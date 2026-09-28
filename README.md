@@ -25,7 +25,7 @@ Everything here is based on what each repo's code actually shows. Where somethin
 | 10 | [Fraud-Detection-With-Sequence-Models](https://github.com/MelvTheGoat/Fraud-Detection-With-Sequence-Models) | Measures whether GRU/TCN/Transformer beat a strong LightGBM for real-time fraud. They rank better only after attackers adapt. | [Open](Fraud-Detection-With-Sequence-Models/) |
 | 11 | [nyc-taxi-demand-forecast](https://github.com/MelvTheGoat/nyc-taxi-demand-forecast) | Forecasts hourly NYC taxi demand per zone 24h ahead at the cost-optimal quantile, and monitors, retrains and serves itself. | [Open](nyc-taxi-demand-forecast/) |
 | 12 | [Uplift-Modelling-Decision](https://github.com/MelvTheGoat/Uplift-Modelling-Decision) | An uplift study on a real randomised trial: who buys *because* of the e-mail, and why the budget matters more than the targeting. | [Open](Uplift-Modelling-Decision/) |
-| 13 | [Production-Grade-Double-Entry-Ledger-API](https://github.com/MelvTheGoat/Production-Grade-Double-Entry-Ledger-API) | A double-entry ledger and payments API on FastAPI, PostgreSQL and Redis. | Coming |
+| 13 | [Production-Grade-Double-Entry-Ledger-API](https://github.com/MelvTheGoat/Production-Grade-Double-Entry-Ledger-API) | A double-entry ledger and payments API where correctness under concurrency and retries is enforced by Postgres and proven by tests. | [Open](Production-Grade-Double-Entry-Ledger-API/) |
 
 ## Files in each folder
 
