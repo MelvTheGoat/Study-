@@ -13,7 +13,7 @@ Everything here is based on what each repo's code actually shows. Where somethin
 | 3 | [LLM](https://github.com/MelvTheGoat/LLM) | Trains small GPT-style models (about 1M–100M parameters) from scratch on free GPUs, with exact stop-and-resume. | [Open](LLM/) |
 | 4 | [Search](https://github.com/MelvTheGoat/Search) (private) | Finds ML/AI jobs, labels whether each is reachable from Nigeria, ranks them against a CV, and keeps a tracker. | [Open](Search/) |
 | 5 | [web3-risk-mcp](https://github.com/MelvTheGoat/web3-risk-mcp) | A read-only MCP server that lets AI assistants check crypto wallets, tokens and contracts, with an explainable 0–100 risk score. | [Open](web3-risk-mcp/) |
-| 6 | [Premier-League](https://github.com/MelvTheGoat/Premier-League) | Predicts Premier League results and scorelines, and keeps a public record of every prediction. | Coming |
+| 6 | [Premier-League](https://github.com/MelvTheGoat/Premier-League) | Predicts every Premier League match from 200+ context features, retrains each gameweek, and publishes a self-checking public record. | [Open](Premier-League/) |
 | 7 | [Stack](https://github.com/MelvTheGoat/Stack) | "Reckon": matches incoming payments to invoices and hands unsure cases to a person. | Coming |
 | 8 | [Nigerian-Fintech-Compliance-RAG](https://github.com/MelvTheGoat/Nigerian-Fintech-Compliance-RAG) | Answers questions on Nigerian fintech rules, with the exact source passage shown underneath. | Coming |
 | 9 | [Credit-Risk-Decisioning](https://github.com/MelvTheGoat/Credit-Risk-Decisioning) | Turns calibrated default probabilities into approve/decline decisions, served by an API and a UI. | Coming |
