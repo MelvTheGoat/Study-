@@ -79,8 +79,8 @@ flowchart LR
 
 1. The assistant calls `score_risk(address, chain)`.
 2. Validate the chain and address format.
-3. Detect the address type (wallet vs contract vs token) from RPC code and token data.
-4. Run the right checks in parallel. Each is wrapped, so one failing source doesn't stop the rest.
+3. Read the address's code over RPC. No code means a wallet. Code means a contract or token.
+4. Run the right checks in parallel: for code, token check + contract inspection + labels (then call it a token if token data came back). For a wallet, wallet profile + 1-hop trace. Each is wrapped, so one failing source doesn't stop the rest.
 5. Each check returns **findings** (ID, severity, reason, source) and a **source status** (ok or failed, and why).
 6. The scorer looks up each finding's rule, keeps only the biggest per group, sums, clamps to 0–100, applies the decisive floor of 75, and sets confidence from source success.
 7. It returns: score, level (low/medium/high/critical), verdict, confidence, address type, every contribution (points, counted?, reason, source), checks run, and data gaps.
