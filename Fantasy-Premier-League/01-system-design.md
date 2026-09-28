@@ -137,7 +137,7 @@ The backend has **only four runtime dependencies**: fastapi, uvicorn, httpx, pul
 | Transfers / hits | 5 transfers, one −4 hit (GW3) | n/a |
 | Chips played | none yet | n/a |
 
-Five gameweeks is far too few to judge either model.
+Five gameweeks is far too few to judge either model. Also, GW1–4 were re-picked on 17 Sep right after a model fix, so GW5 is the only fully live week so far.
 
 ## What I'd change at 10x scale
 
