@@ -16,7 +16,7 @@ Everything here is based on what each repo's code actually shows. Where somethin
 | 6 | [Premier-League](https://github.com/MelvTheGoat/Premier-League) | Predicts every Premier League match from 200+ context features, retrains each gameweek, and publishes a self-checking public record. | [Open](Premier-League/) |
 | 7 | [Stack](https://github.com/MelvTheGoat/Stack) | "Reckon": matches Nigerian payments to invoices with rules first and a calibrated model second, and queues the rest by money at risk. | [Open](Stack/) |
 | 8 | [Nigerian-Fintech-Compliance-RAG](https://github.com/MelvTheGoat/Nigerian-Fintech-Compliance-RAG) | A hybrid-search RAG assistant for Nigerian fintech rules that cites every claim and shows the source passage. | [Open](Nigerian-Fintech-Compliance-RAG/) |
-| 9 | [Credit-Risk-Decisioning](https://github.com/MelvTheGoat/Credit-Risk-Decisioning) | Turns calibrated default probabilities into approve/decline decisions, served by an API and a UI. | Coming |
+| 9 | [Credit-Risk-Decisioning](https://github.com/MelvTheGoat/Credit-Risk-Decisioning) | A credit decisioning system: calibrated PD, cost-optimal approve/decline, reason codes, fairness audit and monitoring, served by an API. | [Open](Credit-Risk-Decisioning/) |
 
 ## Pinned projects
 
