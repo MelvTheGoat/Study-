@@ -35,7 +35,7 @@ app.py + entrypoint.sh   Streamlit :8080 -> API :8000 (both in one container)
 | Decision | Why |
 |---|---|
 | Synthetic book with truth for rejects | Only way to validate reject inference and fairness |
-| Out-of-time split by vintage, drift in test | Tests robustness, not interpolation |
+| Out-of-time split by vintage, drift in test | Tests whether it holds up under change, not just interpolation |
 | Headline = net cost | The business objective |
 | `p* = margin/(margin+LGD)` | Cost-optimal for calibrated PD. Model-independent. |
 | Calibrator selection: slope within 0.15 of 1, then ECE | Avoids isotonic's overfit (in-period ECE 0, OOT slope 0.726) |
