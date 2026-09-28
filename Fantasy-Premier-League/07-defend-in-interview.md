@@ -56,7 +56,7 @@ At zero, the optimiser buys four £4.0m players who never play. That's correct f
 It's stateless. `due_work(db, now)` is a pure function that reads the database against the clock and returns the jobs owed. A restart, a redeploy or a week offline all resolve the same way. It re-checks up to three times per tick, because one job can create another (a refresh can reveal a finished gameweek to finalise). The clock and sleep are passed in, so time rules are tested without waiting.
 
 ### 14. "What are the results?"
-From the season database after GW5: Best XI 322, Manager 268, a 54-point gap. The Manager beat the average once in five weeks and Best XI twice. It's too early to conclude anything. I'd rather say neither beats the average reliably yet than dress it up.
+From the season database after GW5: Best XI 322, Manager 268, a 54-point gap. The Manager beat the average once in five weeks and Best XI twice. It's too early to conclude anything, and GW1–4 were replayed after a model fix, so GW5 onward is the clean test. I'd rather say neither beats the average reliably yet than dress it up.
 
 ### 15. "What would you do next?"
 A backtest on the 2025/26 season to measure projection error and tune weights. Recording team news every gameweek to close the leak. Checking blank and double gameweeks against real fixtures. And effective ownership, so the Manager can play against the field.
@@ -68,6 +68,7 @@ A backtest on the 2025/26 season to measure projection error and tune weights. R
 | Weak spot | What they might say | Honest answer |
 |---|---|---|
 | No backtest | "So you don't know if the predictions are any good?" | "Correct. I know the squads are legal and scored honestly. Prediction accuracy isn't measured yet. A backtest on last season is the first thing I'd add." |
+| GW1–4 replayed after a model fix | "Didn't you tune the model after seeing those weeks?" | "Yes. The replay used only pre-deadline data, but I fixed the minutes model after those weeks were played. So I treat GW5 onward as the real out-of-sample test." |
 | Hand-set constants | "Where do 0.82 decay and 450 minutes come from?" | "They're reasoned, not fitted. The code comments say so. They're named constants, so a backtest can tune them." |
 | Results below average | "Your bots don't beat the average." | "Not reliably yet, after five weeks. The project measures the gap between the two models, and beating the field is a separate goal. Effective ownership is the missing piece for that." |
 | Team-news leak | "Isn't the backfill cheating?" | "Partly, on injury flags only. Prices, results and projections are time-boxed. I documented the leak rather than hiding it." |

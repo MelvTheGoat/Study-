@@ -142,7 +142,7 @@ From the season database on 28 September 2026, after five gameweeks:
 | Points | 268 | 322 |
 | Beat the average | 1 of 5 | 2 of 5 |
 
-That's a 54-point gap. Five weeks is far too few to mean much, and neither model is beating the average reliably yet. I'd rather say that plainly than explain it away. Note too that the first deploy lost its database, so GW1–3 were re-decided later, using only pre-deadline data.
+That's a 54-point gap. Five weeks is far too few to mean much, and neither model is beating the average reliably yet. I'd rather say that plainly than explain it away. One more caveat. GW1–4 were re-decided on 17 September, right after I fixed the minutes model. Each replay used only pre-deadline data, but I'd already seen those weeks when I fixed the model, so only GW5 onward is a truly live test.
 
 The test suite has 610 tests, and all of them run with no network.
 

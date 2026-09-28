@@ -130,6 +130,7 @@ The captain ends up as the highest-projected starter. `optimise_lineup` re-solve
 - **Defensive contribution** probability is `min(rate × minutes share, 1)`, a rough approximation.
 - **Chip thresholds** are corrections, not validated.
 - **Team-news leak** in backfilled gameweeks.
+- **Model chosen after seeing GW1–4.** The live DB's GW1–4 picks were locked on 17 Sep, minutes after the minutes-model fix (`manager_state.locked_at`). The data is time-boxed, but the model version isn't. Only GW5+ is out-of-sample.
 - **Docs drift:** README says ~490 tests, `how-it-works.md` says 574 (actual 610). The docs list chip bars 16/10/12/20 and "0–3 transfers", but the code uses 22/12/18/30 and 0–5. The docs also say "two hours before a deadline", but the code uses 8 hours.
 - **Dead constant:** `BENCH_SLOT_WEIGHTS` is defined and exported but not used.
 - **Single writer:** SQLite plus `concurrency: season`. It can't scale out as-is.
