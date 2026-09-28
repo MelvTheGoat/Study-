@@ -94,6 +94,6 @@ Repo: https://github.com/MelvTheGoat/Uplift-Modelling-Decision
 
 ## 10. Reproducible research engineering
 
-**In this project:** a CLI pipeline, results as JSON/CSV, strict mypy, 135 tests on synthetic data, CI on Python 3.10–3.12.
+**In this project:** a CLI pipeline, results as JSON/CSV, strict mypy, 136 tests on synthetic data, CI on Python 3.10–3.12.
 
 **Also be ready to explain:** testing statistical code against known truth, and seeding.

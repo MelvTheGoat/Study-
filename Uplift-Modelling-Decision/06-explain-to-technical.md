@@ -63,7 +63,7 @@ Validation (balanced 50/50 synthetic, n=20,000, true ATE 0.0223, 37% sleeping do
 
 **Experiment:** 4 cells with 10% holdbacks. 0.91% vs 0.68% → 40,900 per cell at α=0.05 (95% confidence), 80% power. CUPED: −50% variance on visits, −1.7% on conversion.
 
-**Tests:** README says 135 tests, all on synthetic data. My run: see this folder's README.
+**Tests:** 136 pass in my run (~44 s), all on synthetic data (the README says 135).
 
 ## Known weaknesses
 

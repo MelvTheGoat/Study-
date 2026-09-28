@@ -70,7 +70,7 @@ flowchart TB
 | numpy (≥2.0), pandas, scipy | Data and stats | `np.trapezoid` needs NumPy 2 |
 | scikit-learn, LightGBM | Base learners | Swappable bases for the meta-learners |
 | EconML | Causal forest (DML) | A well-tested implementation |
-| pytest, ruff, mypy (strict) | Quality | README says 135 tests, all synthetic |
+| pytest, ruff, mypy (strict) | Quality | 136 tests pass (my run), all synthetic |
 | GitHub Actions | CI on 3.10–3.12 | Lint, types, tests |
 
 ## Data flow, step by step
