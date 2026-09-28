@@ -86,7 +86,7 @@ flowchart TB
 | Streamlit | Demo UI | Quick form |
 | Docker (multi-stage) | Build + runtime | Trains in the builder stage. Non-root runtime. |
 | GitHub Actions + AWS ECR | CI and image registry | Push on main |
-| pytest, ruff, mypy | Quality | README says 223 tests. See 06 for my run. |
+| pytest, ruff, mypy | Quality | 227 tests pass with statsmodels <0.15. On 0.15, 4 Heckman tests fail (see 06). |
 
 ## Data flow, step by step
 
