@@ -64,7 +64,7 @@ Repo: https://github.com/MelvTheGoat/Uplift-Modelling-Decision
 
 ---
 
-## 7. Robustness and falsification
+## 7. Stress-testing and falsification
 
 **Simple explanation:** try to break your own result.
 

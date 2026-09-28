@@ -14,7 +14,7 @@ A budget-constrained uplift (causal) study on the Hillstrom randomised e-mail tr
 | Data | Hillstrom 2008 (64k customers, 42,613 analysed) + synthetic |
 | 30% budget | $3,066 profit (CI $782–$5,535) vs $1,674 random |
 | Levers | Budget ≈ $3,170 vs targeting ≈ $1,390 |
-| Robustness | Men's placebo failed. Women's passed. |
+| Stress tests | Men's placebo failed. Women's passed. |
 | Tests (my run) | 136 passing |
 | Note | One commit. Results committed in `results/`. |
 

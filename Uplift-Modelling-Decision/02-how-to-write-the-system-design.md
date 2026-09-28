@@ -44,7 +44,7 @@ One line:
 ```
 [Synthetic data with known effect] -> [S/T/X-learner, causal forest] -> [Recovery metrics]   (validate first)
 [Hillstrom randomised trial] -> [Cross-fitted uplift scores] -> [Qini/AUUC/deciles + bootstrap + beats-random]
-      -> [Policy: frontier, measured profit per depth] -> [Robustness: placebo, balance, cost, seeds]
+      -> [Policy: frontier, measured profit per depth] -> [Stress tests: placebo, balance, cost, seeds]
       -> [Experiment design: power/MDE, CUPED] -> [MEMO.md]
 ```
 
@@ -71,7 +71,7 @@ One line:
 - Profit = margin × incremental revenue − cost × contacts.
 - Frontier: 30% → $3,066. Optimum at 85% → $6,241.
 
-### 4e. Robustness
+### 4e. Stress tests
 - Placebo: shuffle the treatment 10×. The men's campaign failed (real 9.4 vs 2.8 ± 6.3).
 - Balance (max SMD 0.014), cost sweep, seed stability (44% overlap).
 

@@ -31,7 +31,7 @@ flowchart TB
         CV[Cross-fitted uplift scores]
         EVAL[Qini, AUUC, deciles,<br/>transformed outcome,<br/>bootstrap CIs, beats-random test<br/>NO AUC]
         POL[Policy: budget frontier,<br/>profit with CIs, sleeping-dog accounting]
-        ROB[Robustness: placebo, balance,<br/>cost sensitivity, seed stability]
+        ROB[Stress tests: placebo, balance,<br/>cost sensitivity, seed stability]
     end
 
     EXP[4. experiment.py<br/>power / MDE, CUPED demo]
@@ -57,7 +57,7 @@ flowchart TB
 | Evaluation | `src/evaluation.py` | Qini curve and coefficient, AUUC, uplift by decile, transformed-outcome MSE, bootstrap intervals, a one-sided beats-random test. **No AUC.** | AUC rewards predicting buyers, which is the wrong target. |
 | Policy | `src/policy.py` | Budget frontier (profit by share mailed), optimal depth, profit CIs, sleeping-dog accounting. **Effects are measured from the randomised holdout inside the selected group**, never from model predictions. | Avoids circular self-grading. |
 | Experiment design | `src/experiment.py` | Power/MDE in both directions, and a CUPED variance-reduction demo. | Designs the follow-up test. |
-| Robustness | `src/robustness.py` | Placebo test (shuffled treatment labels), covariate balance, cost sensitivity, seed stability. | Tries to break the finding. |
+| Stress tests | `src/robustness.py` | Placebo test (shuffled treatment labels), covariate balance, cost sensitivity, seed stability. | Tries to break the finding. |
 | CLI | `src/cli.py` | `validate`, `naive`, `hillstrom`, `experiment`, `all` (`--quick`). Writes `results/`. | Every memo number traces to a file. |
 | Config | `src/config.py` | $0.10 per contact, 30% gross margin, a budget of 30% of the file. | The business assumptions, in one place. |
 | Memo | `MEMO.md` | A 2-page plain-language decision memo for a marketing director. | The deliverable. |
@@ -79,7 +79,7 @@ flowchart TB
 2. **Naive:** compute the raw lift, then show the selection-bias overstatement and the response-vs-uplift targeting gap on known truth.
 3. **Hillstrom:** for each campaign/outcome (men's conversion, men's visit, women's conversion), cross-fit uplift scores, build the Qini, deciles and bootstrap CIs, and run the beats-random test.
 4. **Policy:** rank by predicted uplift and, for each depth, **measure** incremental conversions and spend from treated vs control inside that slice → profit = margin × incremental revenue − $0.10 × contacts.
-5. **Robustness:** placebo (10 shuffled-label refits), balance, cost sweep, seed stability.
+5. **Stress tests:** placebo (10 shuffled-label refits), balance, cost sweep, seed stability.
 6. **Experiment:** size a 4-cell validation test, and demonstrate CUPED.
 7. **Memo:** summarise the decision, the uncertainty and what would change it.
 

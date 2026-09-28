@@ -65,7 +65,7 @@ At the current 30% budget, model targeting makes **$3,066** (95% CI $782–$5,53
 
 ## Step 5: try to break it (and it broke)
 
-I ran four robustness checks. One failed, and it's the headline caveat of the memo.
+I ran four stress tests. One failed, and it's the headline caveat of the memo.
 
 **Placebo test:** I refitted the whole pipeline ten times on **randomly shuffled treatment labels**, where there's no effect to find. On the men's campaign, the real model scored **9.4**. The fake runs averaged **2.8** with a spread of **6.3**, and **two of the ten fake runs scored higher than the real one**. The men's ranking sits inside the range this method produces from pure noise. The women's campaign passed cleanly.
 

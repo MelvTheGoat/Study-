@@ -6,7 +6,7 @@ Repo: https://github.com/MelvTheGoat/Uplift-Modelling-Decision
 
 ## Summary
 
-A budget-constrained uplift study on the Hillstrom randomised e-mail trial. Meta-learners (S/T/X, hand-implemented over sklearn/LightGBM bases) and an EconML causal forest are validated on a synthetic DGP with known individual effects, then applied with cross-fitting to Hillstrom. Evaluation uses Qini/AUUC/deciles/transformed outcome with bootstrap CIs and a beats-random test (no AUC). Policy profit is measured from randomised contrasts within the selected slice. Robustness: placebo, balance, cost sensitivity, seed stability. Plus power/MDE and a CUPED demo. The deliverable is `MEMO.md`. ~4,000 lines. One commit, 7 Aug 2026. Results committed in `results/*.json`.
+A budget-constrained uplift study on the Hillstrom randomised e-mail trial. Meta-learners (S/T/X, hand-implemented over sklearn/LightGBM bases) and an EconML causal forest are validated on a synthetic DGP with known individual effects, then applied with cross-fitting to Hillstrom. Evaluation uses Qini/AUUC/deciles/transformed outcome with bootstrap CIs and a beats-random test (no AUC). Policy profit is measured from randomised contrasts within the selected slice. Stress tests: placebo, balance, cost sensitivity, seed stability. Plus power/MDE and a CUPED demo. The deliverable is `MEMO.md`. ~4,000 lines. One commit, 7 Aug 2026. Results committed in `results/*.json`.
 
 ## Architecture
 
@@ -59,7 +59,7 @@ Validation (balanced 50/50 synthetic, n=20,000, true ATE 0.0223, 37% sleeping do
 | Men's visit | CF 21.51 (no), S 11.70 (no), X 5.82 (no), T −3.80 (no) |
 | Women's conversion | S 13.12 (**yes**), CF 9.07 (**yes**), T 2.49 (no), X −0.25 (no) |
 
-**Policy and robustness (MEMO.md):** 30% budget → $3,066 (CI $782–$5,535) vs $1,674 random. Optimum 85% → $6,241. The men's placebo failed (9.4 vs 2.8 ± 6.3, 2/10 fakes higher). Women's passed. Seed Qini range −0.1 to 6.8, 44% selection overlap. Balance max SMD 0.014. Cost: $0.25/contact → optimum 35%. $0.50 → mailing everyone loses $11,500.
+**Policy and stress tests (MEMO.md):** 30% budget → $3,066 (CI $782–$5,535) vs $1,674 random. Optimum 85% → $6,241. The men's placebo failed (9.4 vs 2.8 ± 6.3, 2/10 fakes higher). Women's passed. Seed Qini range −0.1 to 6.8, 44% selection overlap. Balance max SMD 0.014. Cost: $0.25/contact → optimum 35%. $0.50 → mailing everyone loses $11,500.
 
 **Experiment:** 4 cells with 10% holdbacks. 0.91% vs 0.68% → 40,900 per cell at α=0.05 (95% confidence), 80% power. CUPED: −50% variance on visits, −1.7% on conversion.
 

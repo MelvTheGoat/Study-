@@ -89,7 +89,7 @@ flowchart TB
 | Prefect 3 | Scheduling | Python-native flows |
 | Evidently | Drift report support in `monitoring.py` | Standard drift tooling alongside the PSI/KS code |
 | FastAPI | Serving | Simple |
-| tenacity, requests | Robust downloads | Retry with backoff |
+| tenacity, requests | Reliable downloads | Retry with backoff |
 | Docker Compose, Makefile, GitHub Actions | Ops | One-command runs, CI |
 | pytest, ruff, mypy | Quality | 167 tests pass (my run) |
 
