@@ -65,7 +65,7 @@ src/serve.py        FastAPI: /forecast /health /metrics /model-info
 
 - Operating-point sweep (LightGBM): q50 130,341 (+25%), q75 105,557 (+1.2%), q80 104,265, q90 110,060.
 - The committed CI baseline (`baselines/backtest_baseline.json`, a smaller CI config: 3-day folds, stride 12h) has LightGBM MASE 0.863 and cost 9,634 vs seasonal naive 14,512. It's a different config, so it's not comparable to the headline table.
-- **Tests:** the README and the last commit message say 167 tests. See this folder's README for my run.
+- **Tests:** 167 pass (I ran them, ~2 min 49 s), matching the README.
 
 ## Known weaknesses
 

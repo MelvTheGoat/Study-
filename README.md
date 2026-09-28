@@ -23,7 +23,7 @@ Everything here is based on what each repo's code actually shows. Where somethin
 | # | Project | One-line summary | Report |
 |---|---|---|---|
 | 10 | [Fraud-Detection-With-Sequence-Models](https://github.com/MelvTheGoat/Fraud-Detection-With-Sequence-Models) | Measures whether GRU/TCN/Transformer beat a strong LightGBM for real-time fraud. They rank better only after attackers adapt. | [Open](Fraud-Detection-With-Sequence-Models/) |
-| 11 | [nyc-taxi-demand-forecast](https://github.com/MelvTheGoat/nyc-taxi-demand-forecast) | Forecasts hourly taxi demand per NYC zone 24 hours ahead, backtests itself and retrains. | Coming |
+| 11 | [nyc-taxi-demand-forecast](https://github.com/MelvTheGoat/nyc-taxi-demand-forecast) | Forecasts hourly NYC taxi demand per zone 24h ahead at the cost-optimal quantile, and monitors, retrains and serves itself. | [Open](nyc-taxi-demand-forecast/) |
 | 12 | [Uplift-Modelling-Decision](https://github.com/MelvTheGoat/Uplift-Modelling-Decision) | An uplift study: which customers to target when the marketing budget is fixed. | Coming |
 | 13 | [Production-Grade-Double-Entry-Ledger-API](https://github.com/MelvTheGoat/Production-Grade-Double-Entry-Ledger-API) | A double-entry ledger and payments API on FastAPI, PostgreSQL and Redis. | Coming |
 

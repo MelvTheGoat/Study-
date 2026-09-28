@@ -91,7 +91,7 @@ flowchart TB
 | FastAPI | Serving | Simple |
 | tenacity, requests | Robust downloads | Retry with backoff |
 | Docker Compose, Makefile, GitHub Actions | Ops | One-command runs, CI |
-| pytest, ruff, mypy | Quality | README says 167 tests |
+| pytest, ruff, mypy | Quality | 167 tests pass (my run) |
 
 ## Data flow, step by step
 
