@@ -9,7 +9,7 @@ Everything here is based on what each repo's code actually shows. Where somethin
 | # | Project | One-line summary | Report |
 |---|---|---|---|
 | 1 | [Fantasy-Premier-League](https://github.com/MelvTheGoat/Fantasy-Premier-League) | Two bots play the 2026/27 FPL season from one projection, one under real rules and one rebuilt weekly, to measure what continuity costs. | [Open](Fantasy-Premier-League/) |
-| 2 | [Stocks](https://github.com/MelvTheGoat/Stocks) | An agent that answers factual questions about US and NGX stocks, plus the eval that measures it. | Coming |
+| 2 | [Stocks](https://github.com/MelvTheGoat/Stocks) | An agent (early stage) that will answer factual questions about US and NGX stocks, built evaluation-first. | [Open](Stocks/) |
 | 3 | [LLM](https://github.com/MelvTheGoat/LLM) | Trains small GPT-style models (about 1M–100M parameters) from scratch and runs experiments on them. | Coming |
 | 4 | [Search](https://github.com/MelvTheGoat/Search) (private) | Finds ML/AI jobs, scores them against a CV, and keeps a tracker. | Coming |
 | 5 | [web3-risk-mcp](https://github.com/MelvTheGoat/web3-risk-mcp) | An MCP server for crypto wallet risk: fund tracing and an explainable risk score. | Coming |
