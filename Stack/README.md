@@ -1,0 +1,32 @@
+# Stack ("Reckon")
+
+Repo: https://github.com/MelvTheGoat/Stack
+
+## In short
+
+Reckon matches incoming payments (card, dedicated account, bank transfer, cash) to invoices. Exact rules go first, then an 18-feature calibrated logistic model with a cost-derived threshold. Everything uncertain goes to a review queue ranked by money at risk, with an append-only audit log. Built for Paystack in Nigeria, with integer-kobo money.
+
+## Key facts
+
+| | |
+|---|---|
+| Language | Python 3.11 (mypy strict) |
+| Core tech | FastAPI, SQLAlchemy, Pydantic, httpx, Jinja2, standard-library ML |
+| Results (synthetic month, reproduced) | 76.1% auto-closed, 0 wrong, recall 80.1%, first 40 reviews = 91% of the money at risk |
+| Threshold | 0.85, from a ₦60 vs ₦5,000 cost ratio |
+| Tests | 494 pass with the optional LLM extra. 8 fail without it. |
+| Deployed | Not yet |
+
+## Files
+
+| File | What's in it |
+|---|---|
+| [01-system-design.md](01-system-design.md) | Parts, diagram, stack, data flow, trade-offs, 10x |
+| [02-how-to-write-the-system-design.md](02-how-to-write-the-system-design.md) | Whiteboard steps |
+| [03-linkedin-post.md](03-linkedin-post.md) | LinkedIn post |
+| [04-blog-post.md](04-blog-post.md) | Blog post |
+| [05-explain-to-non-technical.md](05-explain-to-non-technical.md) | Plain-language explanation |
+| [06-explain-to-technical.md](06-explain-to-technical.md) | Engineer-level explanation |
+| [07-defend-in-interview.md](07-defend-in-interview.md) | Pitch, questions, weak spots |
+| [08-ten-points-to-know.md](08-ten-points-to-know.md) | 10 key facts |
+| [09-what-this-proves-i-know.md](09-what-this-proves-i-know.md) | Skills and related topics |
