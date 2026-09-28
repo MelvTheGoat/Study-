@@ -1,6 +1,6 @@
 # LLM RAG System: The Models Behind the Search
 
-RAG (Retrieval-Augmented Generation) means an AI chatbot first looks up helpful text, then writes its answer using that text. A company help bot that answers from its own manuals is a common example. This file is about the two models that make the "look up" part smart, and how to make them better over time.
+RAG (Retrieval-Augmented Generation) means an AI chatbot first looks up helpful text, then writes its answer using that text. A company help bot that answers from its own manuals is a common example. This file is about the two models (programs that learned patterns from examples) that make the "look up" part smart, and how to make them better over time.
 
 *How to split documents, store them and show sources is covered in [Artificial Intelligence/01-rag-system.md](../Artificial%20Intelligence/01-rag-system.md). Here we focus only on the models.*
 

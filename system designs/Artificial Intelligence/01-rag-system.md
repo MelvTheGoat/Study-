@@ -2,7 +2,7 @@
 
 RAG (Retrieval-Augmented Generation) is a way to make an AI chatbot answer from *your* documents instead of from memory. Think of a company help bot that answers "How many holiday days do I get?" by reading the staff handbook and pointing to the exact page. It matters because it cuts down on made-up answers and lets people check where each answer came from.
 
-*This file is about building the app. The models that power the search, and how to improve them, are in [Machine Learning/05-llm-rag-system.md](../Machine%20Learning/05-llm-rag-system.md).*
+*This file is about building the app. The search models (programs that learned patterns from examples) and how to improve them are in [Machine Learning/05-llm-rag-system.md](../Machine%20Learning/05-llm-rag-system.md).*
 
 ## Key Terms
 
