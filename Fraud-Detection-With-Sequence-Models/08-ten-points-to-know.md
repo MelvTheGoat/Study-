@@ -18,7 +18,7 @@ Repo: https://github.com/MelvTheGoat/Fraud-Detection-With-Sequence-Models
    *Why it matters:* the headline ranking result.
 
 6. **Pre-drift tied (0.950 vs 0.956). Post-drift 0.765 vs 0.615. Card-testing recall 0.92 vs 0.84.**
-   *Why it matters:* the advantage is robustness to adaptation.
+   *Why it matters:* the advantage is holding up when attackers adapt.
 
 7. **Cost per transaction 0.0799 ± 0.0122 vs 0.0860 ± 0.0035. Not significant. The earlier "27% saving" came from an accidental ensemble and was corrected.**
    *Why it matters:* honesty about the deployment metric.
