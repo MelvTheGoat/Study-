@@ -41,3 +41,6 @@ Everything here is based on what each repo's code actually shows. Where somethin
 | `07-defend-in-interview.md` | Pitch, questions and answers, weak spots |
 | `08-ten-points-to-know.md` | Ten facts to know by heart |
 | `09-what-this-proves-i-know.md` | Skills shown, plus related topics to prepare |
+| `10-system-design-for-beginners.md` | The whole system explained step by step, for beginners |
+| `11-technical-terms.md` | Every technical term: what it means and why it's used here |
+| `12-tools-and-why.md` | Every tool: what it is and why it was picked |
