@@ -1,6 +1,6 @@
 # Training a Small LLM from Scratch: System Design for Beginners
 
-This project builds everything needed to train small ChatGPT-style models from scratch, on free computers. It covers preparing the text, building the model, training it, testing it, and a job system that survives the free computers switching off. The code is written and tested, but it hasn't been run on a real GPU yet, so there are no results so far.
+This project builds everything needed to train small ChatGPT-style models from scratch, on free computers. It covers preparing the text, building the model, training it, testing it, and a job system that survives the free computers switching off. The code is written and tested, but hasn't been run on a real GPU yet, so there are no results.
 
 ## Key Terms
 
@@ -21,11 +21,11 @@ This project builds everything needed to train small ChatGPT-style models from s
 
 **Step 2: Figure out the data.** We need lots of clean, good-quality text. This project uses FineWeb-Edu, a free collection of educational web pages.
 
-**Step 3: Sketch the main parts.** Text is cleaned, split into tokens and stored. Then a training loop teaches the model and saves checkpoints, and tests measure how good it is.
+**Step 3: Sketch the main parts.** Text is cleaned, tokenized and stored. A training loop teaches the model and saves checkpoints, and tests measure it.
 
 **Step 4: Walk through one training session.** Follow one session on a free GPU, from "pick a job" to "save and stop before time runs out".
 
-**Step 5: Decide how to know it works.** Measure the loss on text the model never trained on, and score it on a standard quiz.
+**Step 5: Decide how to know it works.** Measure the loss on unseen text, and score it on a standard quiz.
 
 **Step 6: Plan for problems.** Free sessions end after about 11 hours, computers crash, and storage is limited. Plan for each.
 
@@ -79,11 +79,11 @@ Step by step:
 
 ### The Main Parts (Step 3)
 
-**Cleaning and Splitting.** It removes broken, too-short and duplicate pages, and records why each one was dropped. Which pages go to the test set is decided by a fingerprint of the page's text. So a page always lands in the same group, and a copy can't sneak into both. It's like sorting exam questions so none of the practice questions appear on the real exam.
+**Cleaning and Splitting.** It removes broken, too-short and duplicate pages. Which pages go to the test set is decided by a fingerprint of the page's text. So a page always lands in the same group, and a copy can't sneak into both. It's like sorting exam questions so none of the practice questions appear on the real exam.
 
 **Tokenizer.** It learns the 16,384 most useful pieces of text from the training pages. A bigger list (32,000) would use up too much of a tiny model's parameters. It's like choosing a small, sensible dictionary for a beginner, instead of the giant one.
 
-**The Model.** A GPT-style model built in PyTorch (a popular Python tool for building AI models). Many of its design choices can be switched on or off, so experiments can compare them fairly. It's like a car where you can swap the tyres or engine and test-drive each version.
+**The Model.** A GPT-style model built in PyTorch (a popular Python tool for building AI models). Many of its design choices can be switched on or off, so experiments can compare them fairly. It's like a car where you can swap the tyres and test-drive each version.
 
 **Training Loop.** It feeds the model text, measures the loss, and nudges the parameters to do better. It uses both GPUs at once, and it knows exactly which piece of text comes next from a single step number. So a stopped job can restart exactly where it left off, like a bookmark in a book.
 
@@ -100,7 +100,7 @@ None of these have been measured yet, because there's been no GPU run.
 - **Test loss**: the loss on the 0.5% of text the model never saw. Lower is better.
 - **Bits per byte**: the same idea, but fair to compare across different tokenizers.
 - **HellaSwag score**: a multiple-choice quiz about what happens next in a story. With 4 choices, guessing gets **25%**, and small models will sit near that.
-- **Tests**: 170 automatic checks pass on a normal computer in about a minute. One proves that stopping and restarting gives exactly the same model as training straight through.
+- **Tests**: 170 automatic checks pass on a normal computer in about a minute, including one proving that stopping and restarting gives the same model.
 
 ### What Can Go Wrong (Step 6)
 
@@ -115,4 +115,4 @@ None of these have been measured yet, because there's been no GPU run.
 - Train on free GPUs, saving checkpoints safely and often.
 - A single step number lets a job restart exactly where it stopped.
 - A job to-do list plus a results branch turns short sessions into long experiments.
-- Everything is built and tested, but no GPU run has happened yet.
+- Everything is built and tested, but not yet run on a GPU.
