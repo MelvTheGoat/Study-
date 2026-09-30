@@ -112,7 +112,7 @@ None of these have been measured yet, because there's been no GPU run.
 ## Quick Recap
 
 - Clean the text, set some aside for testing, and turn it into tokens.
-- Train on free GPUs, saving checkpoints safely and often.
+- Train on free GPUs, saving checkpoints safely.
 - A single step number lets a job restart exactly where it stopped.
 - A job to-do list plus a results branch turns short sessions into long experiments.
 - Everything is built and tested, but not yet run on a GPU.
