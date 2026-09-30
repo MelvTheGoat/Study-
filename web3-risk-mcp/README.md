@@ -29,3 +29,6 @@ A read-only MCP server that lets any AI assistant check a crypto wallet, token o
 | [07-defend-in-interview.md](07-defend-in-interview.md) | Pitch, questions, weak spots |
 | [08-ten-points-to-know.md](08-ten-points-to-know.md) | 10 key facts |
 | [09-what-this-proves-i-know.md](09-what-this-proves-i-know.md) | Skills and related topics |
+| [10-system-design-for-beginners.md](10-system-design-for-beginners.md) | The whole system explained step by step, for beginners |
+| [11-technical-terms.md](11-technical-terms.md) | Every technical term: what it means and why it's used here |
+| [12-tools-and-why.md](12-tools-and-why.md) | Every tool: what it is and why it was picked |
