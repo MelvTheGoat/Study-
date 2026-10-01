@@ -32,6 +32,7 @@ Everything here is based on what each repo's code actually shows. Where somethin
 | File | Purpose |
 |---|---|
 | `README.md` | Short overview and links |
+| `00-start-here.md` | **Start here.** The whole project in simple English (good for NotebookLM) |
 | `01-system-design.md` | Problem, diagram, parts, stack, data flow, trade-offs, 10x scale |
 | `02-how-to-write-the-system-design.md` | Step-by-step whiteboard guide |
 | `03-linkedin-post.md` | Short LinkedIn post |
