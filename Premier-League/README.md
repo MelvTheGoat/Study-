@@ -21,6 +21,7 @@ Predicts every Premier League match each gameweek (home/draw/away probabilities 
 
 | File | What's in it |
 |---|---|
+| [00-start-here.md](00-start-here.md) | **Start here.** The whole project in simple English (good for NotebookLM) |
 | [01-system-design.md](01-system-design.md) | Parts, diagram, stack, data flow, trade-offs, 10x |
 | [02-how-to-write-the-system-design.md](02-how-to-write-the-system-design.md) | Whiteboard steps |
 | [03-linkedin-post.md](03-linkedin-post.md) | LinkedIn post |
