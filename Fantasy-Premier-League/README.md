@@ -27,6 +27,7 @@ The score gap between them measures what being stuck with past decisions costs. 
 
 | File | What's in it |
 |---|---|
+| [00-start-here.md](00-start-here.md) | **Start here.** The whole project in simple English (good for NotebookLM) |
 | [01-system-design.md](01-system-design.md) | Problem, diagram, each part, tech stack, data flow, trade-offs, 10x scale |
 | [02-how-to-write-the-system-design.md](02-how-to-write-the-system-design.md) | Step-by-step whiteboard guide for this system |
 | [03-linkedin-post.md](03-linkedin-post.md) | Short LinkedIn post |
