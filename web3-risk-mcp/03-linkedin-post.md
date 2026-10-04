@@ -4,13 +4,7 @@
 
 ---
 
-I built a tool that lets AI assistants check if a crypto token or wallet is risky.
-
-What it does:
-- Checks for scams like tokens you can't sell
-- Gives a risk score from 0 to 100
-- Gives a reason for every point
-- Only reads data and can never move money
+I built a tool that lets AI assistants check whether a crypto token or wallet is risky. It looks for scams like tokens you can't sell or hidden owner powers, and gives a risk score from 0 to 100 with a reason for every point. It only reads data, so it can never move money.
 
 https://github.com/MelvTheGoat/web3-risk-mcp
 
