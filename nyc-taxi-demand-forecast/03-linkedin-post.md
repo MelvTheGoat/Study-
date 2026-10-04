@@ -4,13 +4,7 @@
 
 ---
 
-I built a system that forecasts taxi demand in New York City.
-
-What it does:
-- Predicts pickups for every zone, every hour, 24 hours ahead
-- Cleans and checks the data automatically
-- Watches for changes in demand
-- Only swaps in a new model when it's clearly better
+I built a system that forecasts taxi demand in New York City, for every zone, every hour, 24 hours ahead. It cleans and checks its own data, watches for changes in demand, and only swaps in a new model when it's clearly better.
 
 https://github.com/MelvTheGoat/nyc-taxi-demand-forecast
 
