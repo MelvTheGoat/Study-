@@ -4,13 +4,7 @@
 
 ---
 
-I built a card fraud detection system.
-
-What it does:
-- Reads a customer's recent payments in order to spot fraud patterns
-- Compares this against the standard fraud model
-- Flags payments in about 7 milliseconds
-- Watches for fraudsters changing tactics
+I built a card fraud detection system that reads a customer's recent payments in order to spot fraud patterns. I tested it against the standard fraud model, and it held up better when fraudsters changed tactics. It flags payments in about 7 milliseconds.
 
 https://github.com/MelvTheGoat/Fraud-Detection-With-Sequence-Models
 
