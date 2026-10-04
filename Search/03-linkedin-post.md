@@ -4,14 +4,7 @@
 
 ---
 
-I built a job-search helper for ML and AI roles.
-
-What it does:
-- Collects jobs from 405 company job boards every day
-- Removes copies
-- Checks if each job is open to me (remote, Africa, or visa sponsor)
-- Scores how well each job fits my CV
-- Keeps everything in a tracker
+I built a job-search helper for ML and AI roles. Every day it collects jobs from 405 company job boards, removes copies, and checks whether each job is actually open to me: remote, in Africa, or with visa sponsorship. It then scores how well each one fits my CV and keeps everything in a tracker.
 
 https://github.com/MelvTheGoat/Search
 
