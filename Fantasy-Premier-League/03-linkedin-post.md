@@ -1,20 +1,12 @@
 # Fantasy-Premier-League: LinkedIn Post
 
-*About 80 words. Copy from the line below.*
+*About 70 words. Copy from the line below.*
 
 ---
 
-Every FPL manager pays for last week's decisions. Nobody sees the bill.
+I built two bots that play Fantasy Premier League using the same predictions. The Manager follows the real rules, with one free transfer a week and −4 for each extra. Best XI picks a perfect new squad every week. The gap between them shows how much being stuck with last week's team really costs.
 
-So I built two bots that use the same predictions:
-- The Manager follows the real rules: 1 free transfer, −4 for each extra.
-- Best XI picks a perfect new squad every week.
-
-The gap between them is the cost of being stuck.
-
-After 5 gameweeks: Best XI 322, Manager 268. Too early to judge.
-
-It picks squads with an optimiser, never uses hindsight, and runs free every 30 minutes.
+After 5 gameweeks it's Best XI 322, Manager 268. Still early.
 
 https://github.com/MelvTheGoat/Fantasy-Premier-League
 
