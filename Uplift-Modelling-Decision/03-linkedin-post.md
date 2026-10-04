@@ -4,13 +4,7 @@
 
 ---
 
-I built a study that decides which customers should get a marketing e-mail.
-
-What it does:
-- Finds customers who buy because they were contacted, not those who'd buy anyway
-- Uses a real e-mail trial of 64,000 customers
-- Works out profit for each budget size
-- Ends with a short decision memo
+I built a study that decides which customers should get a marketing e-mail. It looks for people who buy because they were contacted, not people who'd buy anyway. Using a real e-mail trial of 64,000 customers, it works out the profit at each budget size and ends with a short decision memo.
 
 https://github.com/MelvTheGoat/Uplift-Modelling-Decision
 
