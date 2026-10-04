@@ -4,14 +4,7 @@
 
 ---
 
-I built a loan approval system.
-
-What it does:
-- Predicts the chance a borrower won't pay back
-- Approves or declines based on profit
-- Gives a clear reason for every decline
-- Checks the decisions are fair across groups
-- Records every decision
+I built a loan approval system. It predicts the chance a borrower won't pay back, then approves or declines based on profit, not just accuracy. Every decline comes with a clear reason, the decisions are checked for fairness across groups, and every one is recorded.
 
 https://github.com/MelvTheGoat/Credit-Risk-Decisioning
 
