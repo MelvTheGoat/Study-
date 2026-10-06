@@ -33,3 +33,4 @@ A from-scratch PyTorch system that trains small GPT-style models (~1M–100M par
 | [10-system-design-for-beginners.md](10-system-design-for-beginners.md) | The whole system explained step by step, for beginners |
 | [11-technical-terms.md](11-technical-terms.md) | Every technical term: what it means and why it's used here |
 | [12-tools-and-why.md](12-tools-and-why.md) | Every tool: what it is and why it was picked |
+| [13-talking-it-through.md](13-talking-it-through.md) | The whole build talked through like a conversation, naming every file as it is created |
