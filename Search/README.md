@@ -12,8 +12,9 @@ A daily Python tool that finds ML and AI jobs, labels whether each is reachable 
 |---|---|
 | Language | Python 3.10+ |
 | Core tech | requests, sentence-transformers (MiniLM), SQLite, openpyxl, python-docx |
-| Sources | 405 company boards on 9 ATSs, plus job boards |
-| Tests | 74 passing |
+| Sources | 405 company boards on 9 ATSs, plus job boards, the YC job board, and about 295 startup boards found weekly from startup lists |
+| Tests | 84 passing |
+| In use | Runs daily since 28 Sep 2026: about 126 drafted letters by 8 Oct |
 | Not measured yet | How well the fit score predicts interviews |
 
 Note: this report describes the tool only. It leaves out personal details from the repo (CV content, letters and applications).

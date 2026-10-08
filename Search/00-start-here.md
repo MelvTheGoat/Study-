@@ -18,9 +18,11 @@ It never applies for you. A person reads every job and every cover letter, and a
 
 **Step 1: Collect jobs from free, official sources.** It checks 405 company job boards. These run on 9 different systems that companies use to post jobs, like Greenhouse and Lever. It also checks several job websites that allow automatic collection.
 
+Since October it also looks at startups. It reads the Y Combinator job board, and once a week it builds a list of startups from public startup lists (a16z, the Breakout List, Next Play and Ramp) and finds each one's job board. Startup jobs get their own tag and tab.
+
 It deliberately skips LinkedIn and Indeed, because they don't allow it.
 
-**Step 2: Be polite while collecting.** It waits between requests to the same website, says clearly who it is, and retries failures with growing waits. If one source breaks, the others carry on.
+**Step 2: Be polite while collecting.** It waits between requests to the same website, says clearly who it is, and retries failures with growing waits. If one source breaks, the others carry on. And if a website keeps saying "too many requests", it's skipped for the rest of that run, so one busy site can't hold everything up.
 
 **Step 3: Remove copies.** The same job often appears on several websites. Two posts with the same apply link, or the same company, title and location, count as one. The one with the longest description is kept.
 
@@ -32,7 +34,7 @@ It deliberately skips LinkedIn and Indeed, because they don't allow it.
 
 **Step 7: Hide jobs out of reach.** Jobs that are too senior, need 5+ years, need a Master's or PhD, or are closed to you are hidden. They're kept in the database, so they don't come back as "new" tomorrow.
 
-**Step 8: Update your tracker.** Everything goes into a spreadsheet and an online tracker page. Your own notes and statuses are never overwritten.
+**Step 8: Update your tracker.** Everything goes into a spreadsheet and an online tracker page. Your own notes and statuses are never overwritten. The page now also has a Startups tab, and an Outreach section for keeping track of people you contact, with message templates and follow-ups.
 
 **Step 9: Prepare for cover letters.** The top 15 reachable jobs go into a letter queue. The letters are drafted outside the code, then the code checks them.
 
@@ -76,13 +78,13 @@ It uses a small, free model called MiniLM that runs on your own computer. So you
 - **python-docx**: builds the tailored CVs.
 - **PyYAML**: holds all the settings, so you can tune it without touching code.
 - **cron or Task Scheduler**: runs the search daily.
-- **pytest**: runs 74 automatic checks.
+- **pytest**: runs 84 automatic checks.
 
 ## 7. How Good Is It?
 
-74 automatic tests pass in about 1 second. They cover removing copies, labels, the "never overwrite my notes" rule, spreadsheet edits and the letter checker.
+84 automatic tests pass in a few seconds. They cover removing copies, labels, the "never overwrite my notes" rule, spreadsheet edits and the letter checker.
 
-But whether high fit scores actually lead to interviews **hasn't been measured yet**. There's no data on outcomes so far. How accurate the reachability labels are hasn't been measured either.
+But whether high fit scores actually lead to interviews **hasn't been measured yet**. The tool has run every day since late September, with about 126 cover letters drafted by 8 October, but interview results aren't recorded yet. How accurate the reachability labels are hasn't been measured either.
 
 ## 8. What's Weak or Missing
 

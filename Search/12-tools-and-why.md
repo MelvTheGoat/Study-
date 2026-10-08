@@ -77,7 +77,7 @@ Everything runs on your own computer, for free. No paid AI service is called by 
 ### pytest
 **What it is:** a Python tool for running tests, which are small programs that check the code still works.
 
-**Why it's used here:** 74 tests pass in about 1 second, using saved sample data, so no internet is needed. They cover merging copies, labels, the "never overwrite my notes" rule, spreadsheet edits and the letter checker.
+**Why it's used here:** 84 tests pass in a few seconds, using saved sample data, so no internet is needed. They cover merging copies, labels, the "never overwrite my notes" rule, spreadsheet edits and the letter checker.
 
 ---
 

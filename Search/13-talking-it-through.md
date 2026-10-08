@@ -94,6 +94,8 @@ Now we fetch jobs. And the first rule is: be polite.
 
 `hunt/http.py` is the polite fetcher. It says clearly who it is, waits a minimum time between calls to the same website, retries failures with growing waits, and gives up after a time limit. Being polite keeps you from being blocked, and some websites ask for it.
 
+Later we add one more rule. If a website still says "too many requests" after every retry, twice, we stop asking it for the rest of the run. Otherwise one busy website could stall every board after it.
+
 Then we need one shape for every job, wherever it came from. That's `hunt/models.py`: one job, with its source, company, title, location and so on. Every source gets turned into this shape.
 
 `hunt/text.py` has small text helpers, like turning a job post's web code into plain readable text.
@@ -101,6 +103,10 @@ Then we need one shape for every job, wherever it came from. That's `hunt/models
 Now the readers. `hunt/sources/ats.py` reads company job boards on 9 job systems, like Greenhouse, Lever and Ashby.
 
 These are the original, fullest job posts. `hunt/sources/boards.py` reads job websites, like RemoteOK, Remotive and the "Who is hiring?" thread on Hacker News. Optional sources with keys only run if you've added a key.
+
+Later, in October, we add `hunt/sources/startups.py`, because startups often hire juniors and aren't on the big lists. It reads the Y Combinator job board, which even states each job's visa rule and minimum years.
+
+And once a week it collects startups from public lists, like a16z's and the Breakout List, finds each one's job board, and writes them to `config/startups.yaml`. That's about 295 startups, and their jobs get a "Startup" tag. `tests/test_startups.py` checks it.
 
 And `hunt/sources/__init__.py` saves results from busy job websites for a few hours. Why? Because Remotive, for example, asks for no more than four calls a day.
 
@@ -114,6 +120,9 @@ Tests: `tests/test_http.py` checks the polite fetching. `tests/test_sources.py` 
 > - `hunt/text.py`: turns web code into plain text.
 > - `hunt/sources/ats.py`: reads company boards on 9 job systems.
 > - `hunt/sources/boards.py`: reads job websites.
+> - `hunt/sources/startups.py`: the YC job board and the weekly startup list (added later).
+> - `config/startups.yaml`: the startups found, rebuilt every week.
+> - `tests/test_startups.py`: tests the startup sources.
 > - `hunt/sources/__init__.py`: saves busy websites' results for a few hours.
 > - `hunt/verify.py`: checks every board, and repairs or removes broken ones.
 > - `tests/test_http.py` and `tests/test_sources.py`: fetching tests.
@@ -193,7 +202,7 @@ Those are *your* fields. When a daily run updates a job, it never overwrites the
 
 `hunt/export.py` writes your tracker as an Excel file and a CSV file. And before writing a new one, it reads your edits back in. So you can type notes in Excel, and nothing gets lost.
 
-`hunt/page.py` does the same for an online tracker page, `docs/tracker-page.html`. So you can check and update jobs from your phone, and bring those changes back.
+`hunt/page.py` does the same for an online tracker page, `docs/tracker-page.html`. So you can check and update jobs from your phone, and bring those changes back. Later the page gets a Startups tab, and an Outreach section for the people you contact: their status, follow-ups, message templates, and buttons to copy or send an email. The contact list and the plan behind it live in `docs/outreach/`.
 
 Then `hunt/pipeline.py` ties the full daily run together: fetch, remove copies, filter, label, score, store, export. One broken source never stops the run.
 
@@ -206,6 +215,7 @@ Tests: `tests/test_db.py` checks the "never overwrite my notes" rule. `tests/tes
 > - `hunt/export.py`: the Excel and CSV tracker, reading your edits back first.
 > - `hunt/page.py`: the online tracker page, both ways.
 > - `docs/tracker-page.html`: the online tracker page itself.
+> - `docs/outreach/`: the outreach plan, message templates and contact list (added later).
 > - `hunt/pipeline.py`: the full daily run.
 > - `hunt/cli.py`: every command.
 > - `tests/test_db.py`, `tests/test_page.py`, `tests/test_pipeline.py`, `tests/conftest.py`: storage and run tests.
@@ -228,11 +238,13 @@ And `hunt/cv.py` builds a tailored CV for each job, as a Word file and a PDF, fr
 
 ## What the tool has produced so far
 
-The project folder also holds what it's made. `output/letters/` has about 67 drafted cover letters, one per job, each named by date, company and role, like `2026-09-27_adyen_merchant-fraud-analyst.md`. A small `.gitkeep` file keeps the folder there even when it's empty.
+The project folder also holds what it's made. `output/letters/` has about 126 drafted cover letters by 8 October, one per job, each named by date, company and role, like `2026-09-27_adyen_merchant-fraud-analyst.md`. A small `.gitkeep` file keeps the folder there even when it's empty.
 
 `output/cvs/` has the tailored CVs, a Word and a PDF for each job. And `output/cvs/specs/` has a small file per job, recording which headline, summary and project order were chosen for it.
 
 There's one more document, `docs/internships.md`. It's a list of paid, remote internships and programs open to you, like the Cohere Labs Scholars Program and Google Summer of Code, with when to apply. They're programs, not single jobs, so they're not in the tracker.
+
+And `docs/prep/` holds interview practice, like a mock data science test where each question shows how to solve it and the answer.
 
 > **📁 Files we just created**
 > - `hunt/queue.py`: writes the letter queue.
@@ -241,16 +253,17 @@ There's one more document, `docs/internships.md`. It's a list of paid, remote in
 > - `hunt/checker.py`: checks every letter for made-up numbers and banned phrases.
 > - `tests/test_checker.py`: tests the letter checker.
 > - `hunt/cv.py`: builds a tailored CV per job.
-> - `output/letters/`: about 67 drafted letters, plus `.gitkeep`.
+> - `output/letters/`: about 126 drafted letters, plus `.gitkeep`.
 > - `output/cvs/`: a Word and PDF CV for each job.
 > - `output/cvs/specs/`: what was tailored for each job's CV.
 > - `docs/internships.md`: paid remote programs open to you.
+> - `docs/prep/`: practice for interview tests.
 
 ## So, how's it doing?
 
-74 tests pass in about 1 second, all offline. They cover removing copies, labels, seniority, the "never overwrite my notes" rule, spreadsheet and page edits, the letter checker, and a full offline run.
+84 tests pass in a few seconds, all offline. They cover removing copies, labels, seniority, the "never overwrite my notes" rule, spreadsheet and page edits, the letter checker, and a full offline run.
 
-But whether high fit scores actually lead to interviews **hasn't been measured yet**. There's no data on outcomes so far. How accurate the labels are hasn't been measured either.
+But whether high fit scores actually lead to interviews **hasn't been measured yet**. It has run every day since 28 September, and each run adds about five new application packs. But interview results aren't recorded yet. How accurate the labels are hasn't been measured either.
 
 ## What's still missing?
 

@@ -6,7 +6,7 @@ Repo: https://github.com/MelvTheGoat/Search (private)
 
 ## Summary
 
-A single-user Python CLI (~3,800 lines in `hunt/`) that fetches jobs from 405 ATS company boards and a set of job boards, dedupes, filters for data/ML/AI, labels work-rights reachability with evidence, scores fit locally with MiniLM embeddings plus rules, stores everything in SQLite, and syncs a spreadsheet and an online tracker. It also builds tailored CVs and checks externally drafted cover letters. **74 tests pass (~1 s).** 71 commits over 26–27 Sep 2026.
+A single-user Python CLI (~3,800 lines in `hunt/`) that fetches jobs from 405 ATS company boards and a set of job boards, dedupes, filters for data/ML/AI, labels work-rights reachability with evidence, scores fit locally with MiniLM embeddings plus rules, stores everything in SQLite, and syncs a spreadsheet and an online tracker. It also builds tailored CVs and checks externally drafted cover letters. **84 tests pass (~3 s).** 96 commits from 26 Sep to 8 Oct 2026, most of the later ones being daily runs.
 
 ## Architecture
 
@@ -18,6 +18,8 @@ hunt/sources/ats.py     Greenhouse, Lever, Ashby, SmartRecruiters, Workable,
 hunt/sources/boards.py  RemoteOK, Remotive, Arbeitnow, Himalayas, Jobicy,
                         Working Nomads, WWR (RSS), The Muse, HN, Amazon,
                         + keyed: Adzuna, Reed, Jooble, Findwork
+hunt/sources/startups.py  YC job board + weekly startup discovery (a16z, Breakout
+                        List, Next Play, Ramp) -> config/startups.yaml
 hunt/sources/__init__   time-based cache for aggregators
 hunt/verify.py          board health check + auto-repair
 hunt/dedupe.py          URL / company+title+location keys
@@ -75,7 +77,8 @@ Domain = min(1, hits/2), where a hit is a title match or ≥2 mentions in the de
 
 ## How it's tested
 
-- **74 tests pass in ~1 s** (I ran them). Files: checker, db, dedupe, http, labels, level, page, pipeline, sources.
+- **84 tests pass in ~3 s** (I ran them). Files: checker, db, dedupe, http, labels, level, page, pipeline, sources, startups.
+- **Late-September fixes:** a per-run rate-limit skip (a host still returning 429 after every retry, twice, is skipped), and wording fixes in the rules: "5 or more years", "five years" and "five (5) years" now count as required years, "Master Degree" as a Master's requirement, and "a plus" as a nice-to-have only when it's phrased that way.
 - The README says they cover dedupe, location labels, the "never overwrite my status" rule, tracker edits, the writing checker, and a full offline run with sample data.
 - **Ranking quality is not measured in the repo yet.** There's no labelled set of "good" jobs, and no link from fit score to interview rate.
 - **Label accuracy is not measured** (no labelled sentences).

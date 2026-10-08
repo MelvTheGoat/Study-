@@ -53,9 +53,10 @@ flowchart LR
 
 | Part | Code | What it does | Why it's there |
 |---|---|---|---|
-| HTTP client | `hunt/http.py` | Clear User-Agent, a minimum wait between calls to the same host, retries with growing waits, timeouts. | Being polite keeps you from being blocked, and some sources ask for it. |
+| HTTP client | `hunt/http.py` | Clear User-Agent, a minimum wait between calls to the same host, retries with growing waits, timeouts. A site that still answers 429 after every retry, twice, is skipped for the rest of the run. | Being polite keeps you from being blocked, and some sources ask for it. |
 | ATS sources | `hunt/sources/ats.py` | Reads company job boards on 9 applicant tracking systems (ATS), from the 405 boards listed in `config/companies.yaml`. | Company boards are the original, most complete job posts. |
 | Board sources | `hunt/sources/boards.py` | Remote boards, aggregators, Amazon's search for African countries, and the HN "Who is hiring?" thread. Keyed APIs only run if a free key is set. | Wider coverage. LinkedIn and Indeed aren't used because they don't allow scraping. |
+| Startup sources | `hunt/sources/startups.py`, `config/startups.yaml` | Reads the Y Combinator job board (which states each job's visa rule and minimum years). Weekly, rebuilds a list of ~295 startups and their Greenhouse/Ashby/Lever/Workable boards from the a16z jobs board, the Breakout List, Next Play and Ramp's vendor directory. Jobs get a `startup` tag. | Startups hire juniors and are missing from the big lists. The weekly rebuild keeps the list fresh without hand edits. |
 | Source cache | `hunt/sources/__init__.py` | Caches aggregator results for some hours. | Remotive asks for no more than four calls a day. |
 | Company check | `hunt/verify.py` | Tests every board. Tries other ATSs for dead tokens, and moves dead boards to `companies_removed.yaml`. | Company boards move or die. This keeps the list clean. |
 | Dedupe | `hunt/dedupe.py` | Same apply URL, or the same company + title + location hash, counts as one job. The longer description wins. | The same job appears on many boards. ATS copies beat short snippets. |
@@ -68,11 +69,11 @@ flowchart LR
 | Reach rules | `hunt/reach.py` | Hides jobs that are restricted, abroad with no sponsor sign, senior or 5+ years, students-only, or requiring a Master's/PhD. | Keeps them in the DB (so they don't come back as "new") but out of your list. |
 | Database | `hunt/db.py` | SQLite `jobs.db`. Upsert never overwrites your fields: status, notes, date applied, letter file, date found. | Re-runs must never lose your own tracking. |
 | Export | `hunt/export.py` | Writes `tracker.xlsx` and `tracker.csv`. Reads your spreadsheet edits back first. | You can edit in Excel and nothing gets lost. |
-| Tracker page | `hunt/page.py`, `docs/tracker-page.html` | `page-export` writes the files for an online page. `page-import` brings back status and note changes. | Check and update jobs from a phone. |
+| Tracker page | `hunt/page.py`, `docs/tracker-page.html` | `page-export` writes the files for an online page. `page-import` brings back status and note changes. Also a Startups tab (up to 150 extra startup jobs) and an Outreach section: contacts, statuses, follow-ups, message templates and cold-email buttons. | Check and update jobs from a phone. |
 | Letter queue | `hunt/queue.py` | Writes `queue/<date>.md` with the top N jobs in reach. | The hand-off to letter writing. |
 | Letter checker | `hunt/checker.py` | Flags dash characters, banned phrases, any number not found in your CV or projects, wrong length (default 150–250 words) and a missing sign-off. | Stops made-up numbers and filler in letters. |
 | Tailored CVs | `hunt/cv.py` | Builds a Word file and PDF per job from `profile/cv_data.yaml`: same facts, with the headline, summary, project order and skill order picked for the job. One column, standard headings. | Tailoring without inventing, and readable by applicant tracking systems. |
-| CLI | `hunt/cli.py`, `hunt.py` | `run`, `list`, `show`, `queue`, `check`, `mark`, `note`, `stats`, `rescore`, `verify-companies`, `page-export`, `page-import`, `cv`. | One command per daily step. |
+| CLI | `hunt/cli.py`, `hunt.py` | `run`, `list`, `show`, `queue`, `check`, `mark`, `note`, `stats`, `rescore`, `verify-companies`, `startups`, `page-export`, `page-import`, `cv`. `list --startups` shows only startup jobs. | One command per daily step. |
 
 **What's outside the code:** the cover letters themselves are written by an AI assistant in a chat session, following rules in the repo, not by the Python code. The Python code prepares the queue and then **checks** what was written.
 

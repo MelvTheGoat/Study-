@@ -5,10 +5,10 @@ Repo: https://github.com/MelvTheGoat/Search (private)
 1. **It finds ML/AI jobs, labels whether you can get them from Nigeria, ranks them against your CV, and never applies for you.**
    *Why it matters:* reachability is the core idea, not just matching.
 
-2. **Sources: 405 company boards on 9 ATSs, plus remote boards, aggregators, Amazon (Africa) and HN "Who is hiring?". No LinkedIn or Indeed.**
+2. **Sources: 405 company boards on 9 ATSs, plus remote boards, aggregators, Amazon (Africa), HN "Who is hiring?", the YC job board and a weekly-built list of startup boards. No LinkedIn or Indeed.**
    *Why it matters:* official, permitted sources only.
 
-3. **Polite fetching: User-Agent, per-host waits, retries with backoff, cached aggregators. One broken source never stops the run.**
+3. **Polite fetching: User-Agent, per-host waits, retries with backoff, cached aggregators. One broken source never stops the run, and a site that keeps rate-limiting is skipped for the rest of it.**
    *Why it matters:* reliability across hundreds of sources.
 
 4. **Dedupe on apply URL or company+title+location. The longer description wins.**
@@ -29,5 +29,5 @@ Repo: https://github.com/MelvTheGoat/Search (private)
 9. **Re-runs never overwrite status, notes, date applied, letter file or date found. Spreadsheet edits are read back.**
    *Why it matters:* a daily tool must never lose your work.
 
-10. **The letter checker flags any number not in your CV, plus dashes, banned phrases, length and sign-off. 74 tests pass. Score quality is not measured yet.**
+10. **The letter checker flags any number not in your CV, plus dashes, banned phrases, length and sign-off. 84 tests pass. Score quality is not measured yet.**
     *Why it matters:* shows careful use of AI, and honesty about what's unvalidated.
