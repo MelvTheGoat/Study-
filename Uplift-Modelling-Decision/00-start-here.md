@@ -77,9 +77,10 @@ This project uses a real, public randomised e-mail trial from 2008 with 64,000 c
 - **NumPy, pandas and SciPy**: maths, tables and statistical tests.
 - **scikit-learn and LightGBM**: ordinary prediction models used as building blocks.
 - **EconML**: provides the "causal forest", a specialised uplift method.
-- **pytest**: runs 136 automatic checks on made-up data.
+- **pytest**: runs 150 automatic checks on made-up data.
 - **ruff and mypy**: keep the code tidy and correct.
-- **GitHub Actions**: checks every change automatically.
+- **GitHub Actions**: checks every change automatically, and publishes the website.
+- **Plain HTML, CSS and JavaScript**: the website, with no extra tools needed. It's hosted free on GitHub Pages.
 
 ## 8. How Good Is It?
 
@@ -102,7 +103,7 @@ But there are important warnings:
 - The data is from 2008, and only covers two weeks, so long-term effects like unsubscribes aren't seen.
 - The rankings change a lot between runs. Only 44% of chosen customers stayed the same.
 - The cost assumptions drive the answer. At $0.25 per e-mail, the best size drops to 35%. At $0.50, e-mailing everyone loses $11,500.
-- It's a study, not a live system.
+- It's a study, not a live system. There is now a public website (added October 2026) that explains the study and lets you upload your own campaign as a CSV file. The analysis runs in your browser, so the file is never sent anywhere. But nothing runs on a schedule or sends e-mails.
 
 ## 10. What This Project Shows You Can Do
 

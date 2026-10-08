@@ -15,8 +15,9 @@ A budget-constrained uplift (causal) study on the Hillstrom randomised e-mail tr
 | 30% budget | $3,066 profit (CI $782–$5,535) vs $1,674 random |
 | Levers | Budget ≈ $3,170 vs targeting ≈ $1,390 |
 | Stress tests | Men's placebo failed. Women's passed. |
-| Tests (my run) | 136 passing |
-| Note | One commit. Results committed in `results/`. |
+| Tests (my run) | 150 passing |
+| Website | https://melvthegoat.github.io/Uplift-Modelling-Decision/ (the study, plus a tool to analyse your own campaign CSV in the browser) |
+| Note | First pushed as one commit (Aug 2026); the website was added in Oct 2026. Results committed in `results/`. |
 
 ## Files
 

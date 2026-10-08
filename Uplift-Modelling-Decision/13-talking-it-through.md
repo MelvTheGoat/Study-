@@ -190,12 +190,40 @@ The 12 decile files are `deciles_mens_conversion_causal-forest.csv`, `deciles_me
 
 - `MEMO.md`: the deliverable. Two pages for the marketing director: the decision, the uncertainty, and what would change it.
 - `METHODS.md`: the technical companion. What each method assumes, how each measure works, and where each one fails.
-- `CODE_WALKTHROUGH.md`: the project's own build-order walkthrough, starting from an empty folder.
+- `CODE_WALKTHROUGH.md`: the project's own build-order walkthrough, starting from an empty folder. It was later removed, and `METHODS.md` now does that job.
 
 > **📁 Files we just created**
 > - `MEMO.md`: the two-page decision memo.
 > - `METHODS.md`: the technical companion.
-> - `CODE_WALKTHROUGH.md`: the project's own walkthrough.
+> - `CODE_WALKTHROUGH.md`: the project's own walkthrough (later removed).
+
+## Step eleven: a website anyone can use
+
+A memo only reaches people who read memos. So, in October, we add a website. It explains the study in plain English, and it has a tool: **upload your own campaign as a CSV file and get the whole analysis on it.**
+
+Here's the nice part: there's no server. Everything runs inside your browser, so your file is never sent anywhere. It's plain HTML, CSS and JavaScript, with no build step and nothing to install.
+
+`web/index.html` is the one page that loads everything, and `web/styles.css` makes it look right. In `web/js/`, `main.js` switches between pages, `charts.js` draws the charts, and `csv.js` reads your file. `stats.js`, `format.js`, `dom.js` and `copy.js` are small helpers for maths, number formatting, building the page, and the words on it. Each page has its own file in `web/js/pages/`: the overview, did it work, targeting, money, sleeping dogs, can we trust it, planning a test, about, and the analyse tool.
+
+The site's numbers come from one file, `web/data.json`. `scripts/build_web_data.py` packs everything in `results/` into it. And `web/sample-campaign.csv` is a built-in example, so you can see the tool work before using your own data.
+
+Now, a danger. `web/js/analysis.js` redoes the Python maths in JavaScript. Two copies of the same formula will drift apart one day.
+
+So `tests/test_web_analysis_parity.py` makes up a campaign, runs both versions, and fails if any number disagrees. `tests/test_web_parity.py` does the same for the sample-size calculator.
+
+Last, `.github/workflows/pages.yml` puts the site online with GitHub Pages, and `DEPLOY.md` explains how. The workflow rebuilds `web/data.json` and refuses to publish if it doesn't match the saved one. That stops the site quietly showing old numbers.
+
+> **📁 Files we just created**
+> - `web/index.html`, `web/styles.css`: the page and its looks.
+> - `web/js/main.js`, `charts.js`, `csv.js`, `stats.js`, `format.js`, `dom.js`, `copy.js`: page switching, charts, reading files, and helpers.
+> - `web/js/pages/`: one file per page, including `analyse.js`, the upload tool.
+> - `web/js/analysis.js`: the study's maths, redone in JavaScript.
+> - `web/data.json`: every result, packed for the site.
+> - `web/sample-campaign.csv`: a built-in example campaign.
+> - `scripts/build_web_data.py`: packs `results/` into `web/data.json`.
+> - `tests/test_web_parity.py`, `tests/test_web_analysis_parity.py`: check the JavaScript matches the Python.
+> - `.github/workflows/pages.yml`: publishes the site.
+> - `DEPLOY.md`: how to put the site online.
 
 ## So, how's it doing?
 

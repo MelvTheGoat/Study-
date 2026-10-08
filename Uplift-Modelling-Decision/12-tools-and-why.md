@@ -72,7 +72,7 @@ This is a study, not a live service, so there's no web server or database. The t
 ### pytest
 **What it is:** a Python tool for running tests, which are small programs that check the code works.
 
-**Why it's used here:** 136 tests pass in about 44 seconds, all using made-up data. So they run anywhere, without downloading the real trial.
+**Why it's used here:** 150 tests pass, all using made-up data. So they run anywhere, without downloading the real trial.
 
 ### ruff
 **What it is:** a fast "linter": it flags mistakes and messy style in code.
@@ -105,6 +105,20 @@ This is a study, not a live service, so there's no web server or database. The t
 
 ---
 
+## The Website
+
+### HTML, CSS and JavaScript
+**What it is:** the three languages every web page is made of: content, looks, and behaviour.
+
+**Why it's used here:** the website is written in them directly, with no extra framework and no build step. So there's nothing to install, and very little that can break later. The charts are drawn by the project's own code too.
+
+### GitHub Pages
+**What it is:** free website hosting from GitHub, for sites made only of files.
+
+**Why it's used here:** the site needs no server, because uploaded CSV files are analysed inside your browser. A workflow republishes it on every change, but only if the site's data file matches the latest results.
+
+---
+
 ## Quick Summary
 
 | Tool | Job in one line |
@@ -115,6 +129,7 @@ This is a study, not a live service, so there's no web server or database. The t
 | EconML | The causal forest method |
 | CLI + settings file | Run each stage, keep assumptions in one place |
 | pytest, ruff, mypy | Keep the code correct |
-| GitHub Actions | Checks every change on 3 Python versions |
+| GitHub Actions | Checks every change on 3 Python versions, and publishes the site |
+| HTML, CSS, JavaScript + GitHub Pages | The free public website |
 | Hillstrom trial | The real randomised data |
 | Criteo-UPLIFT | Optional larger dataset |

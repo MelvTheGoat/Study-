@@ -8,6 +8,10 @@ Repo: https://github.com/MelvTheGoat/Uplift-Modelling-Decision
 
 A budget-constrained uplift study on the Hillstrom randomised e-mail trial. Meta-learners (S/T/X, hand-implemented over sklearn/LightGBM bases) and an EconML causal forest are validated on a synthetic DGP with known individual effects, then applied with cross-fitting to Hillstrom. Evaluation uses Qini/AUUC/deciles/transformed outcome with bootstrap CIs and a beats-random test (no AUC). Policy profit is measured from randomised contrasts within the selected slice. Stress tests: placebo, balance, cost sensitivity, seed stability. Plus power/MDE and a CUPED demo. The deliverable is `MEMO.md`. ~4,000 lines. One commit, 7 Aug 2026. Results committed in `results/*.json`.
 
+**Added Oct 2026:** a static site on GitHub Pages (`web/`, plain ES modules, a hand-written SVG chart engine, no build step). It renders the study from a bundled `web/data.json`, and an Analyse page runs the evaluation, policy and naive-analysis code on a user's CSV entirely client-side. `web/js/analysis.js` is a port of `evaluation.py`, `policy.py` and `naive.py`, held to the Python by parity tests.
+
+The Pages workflow refuses to deploy if `web/data.json` is stale against `results/`. Tests: 150. `policy.py` also switched from `idxmax` labels to positional `argmax`, so a filtered frame can't silently read the wrong row.
+
 ## Architecture
 
 ```

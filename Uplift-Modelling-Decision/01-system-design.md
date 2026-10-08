@@ -2,7 +2,7 @@
 
 Repo: https://github.com/MelvTheGoat/Uplift-Modelling-Decision
 
-> This is a **causal-inference study** that produces a decision memo (`MEMO.md`), not a deployed service. The "system" is a reproducible analysis pipeline. The repo arrived as **one commit** (7 Aug 2026). Results are committed in `results/*.json`.
+> This is a **causal-inference study** that produces a decision memo (`MEMO.md`), not a deployed service. The "system" is a reproducible analysis pipeline. The repo arrived as **one commit** (7 Aug 2026). Results are committed in `results/*.json`. In Oct 2026 a static website was added on GitHub Pages: the study in plain English, plus a tool that runs the analysis on your own CSV in the browser.
 
 ## The problem, in 3 lines
 
@@ -61,6 +61,9 @@ flowchart TB
 | CLI | `src/cli.py` | `validate`, `naive`, `hillstrom`, `experiment`, `all` (`--quick`). Writes `results/`. | Every memo number traces to a file. |
 | Config | `src/config.py` | $0.10 per contact, 30% gross margin, a budget of 30% of the file. | The business assumptions, in one place. |
 | Memo | `MEMO.md` | A 2-page plain-language decision memo for a marketing director. | The deliverable. |
+| Website | `web/` (HTML, CSS, plain JS modules), `scripts/build_web_data.py` | Eight pages explaining the study, read from one bundled `web/data.json`. An **Analyse** page takes any randomised campaign CSV, with columns mapped by dropdowns, and runs the analysis in the browser. | Reaches people who won't read a memo. No server, so the uploaded file never leaves the browser. |
+| Parity tests | `tests/test_web_parity.py`, `tests/test_web_analysis_parity.py` | Run the Python and the JavaScript port (`web/js/analysis.js`) on the same data and fail if any number differs. | Two copies of one formula drift apart unless something checks them. |
+| Deploy | `.github/workflows/pages.yml`, `DEPLOY.md` | Rebuilds `web/data.json` from `results/` and refuses to deploy if it differs from the committed one. | Stops the site quietly showing old numbers. |
 
 ## Tech stack
 
@@ -70,7 +73,8 @@ flowchart TB
 | numpy (≥2.0), pandas, scipy | Data and stats | `np.trapezoid` needs NumPy 2 |
 | scikit-learn, LightGBM | Base learners | Swappable bases for the meta-learners |
 | EconML | Causal forest (DML) | A well-tested implementation |
-| pytest, ruff, mypy (strict) | Quality | 136 tests pass (my run), all synthetic |
+| pytest, ruff, mypy (strict) | Quality | 150 tests pass (my run), all synthetic |
+| HTML, CSS, JavaScript (no build step) | The website | Nothing to install, hosted free on GitHub Pages |
 | GitHub Actions | CI on 3.10–3.12 | Lint, types, tests |
 
 ## Data flow, step by step
@@ -99,7 +103,7 @@ flowchart TB
 - Only ~289 incremental conversions to learn heterogeneity from.
 - Assumed economics: at $0.25 per contact the optimal depth drops to 35%, and at $0.50 mailing everyone loses $11,500.
 - Seed instability: Qini −0.1 to 6.8, with only 44% overlap in selected customers across reruns.
-- Not a production system: no serving, scheduling or monitoring.
+- Not a production system: no scheduling or monitoring. The website is static: it shows the study and runs uploads in the browser, with no server.
 
 ## What I'd change at 10x scale
 

@@ -63,4 +63,5 @@ Only about 289 incremental conversions in the whole trial. Heterogeneity is hard
 | Leaderboard fails beats-random | "No model beats random on men's conversion." | "Correct in the committed results. The top-decile lift is the part with a CI above zero." |
 | Old data | "2008 is ancient." | "It's a method demonstration on a real randomised trial, not a forecast for today's inboxes." |
 | Assumed costs | "Where's $0.10 from?" | "An input in config. The memo says to confirm it first, because it moves the answer more than the model does." |
-| Single commit | "No history?" | "It was pushed as one commit. The results files and tests show the work." |
+| Single commit | "No history?" | "The study was pushed as one commit. The results files and tests show the work. The website came later, in normal commits." |
+| Two implementations | "The site re-implements the maths in JavaScript. Won't it drift?" | "A parity test runs both on the same generated campaign and fails if any number disagrees." |
