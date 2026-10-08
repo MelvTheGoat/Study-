@@ -91,7 +91,9 @@ Even the random-number settings are saved. A test proves that stopping and resta
 
 The first GPU test run (a "smoke test" on a tiny slice of data) passed every step in 12.5 minutes on 7 October. The first attempt didn't: it froze in the data step until Kaggle stopped it 12 hours later, using up about 12 of the 30 free weekly GPU hours. The fix was to start helper processes fresh, and to stop any job that goes silent for 30 minutes.
 
-The smoke test also measured real speeds. The smallest model trains at about 625,000 tokens a second, and the 97.5-million-parameter model at about 37,000. Using both GPUs is 1.74 times faster than one. The full experiment plan now needs about 46 GPU hours. But the real experiments, and their loss and quiz scores, are still waiting.
+The smoke test also measured real speeds. The smallest model trains at about 625,000 tokens a second, and the 97.5-million-parameter model at about 37,000.
+
+Using both GPUs is 1.74 times faster than one. The full experiment plan now needs about 46 GPU hours. But the real experiments, and their loss and quiz scores, are still waiting.
 
 What *is* proven: 193 automatic tests pass on a normal computer. They include the exact-restart test, and a check that adding up small batches gives the same result as one big batch. On the real GPUs, restarting isn't bit-for-bit identical, because GPU maths adds numbers in a varying order. But the difference a restart makes is no bigger than the difference between two identical runs.
 

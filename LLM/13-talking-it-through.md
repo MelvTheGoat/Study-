@@ -254,7 +254,7 @@ The smoke job has its own settings, `configs/smoke/smoke.yaml`. And here's a lov
 
 Finally, `kaggle/runner.ipynb`, the notebook you paste into Kaggle once. It just starts the runner. All the logic lives in the project, so the notebook never needs to change.
 
-Tests: `tests/test_queue.py`, `tests/test_results.py` and `tests/test_runner.py`. That last one is great: it pretends to be several Kaggle sessions in a row, using a local folder in place of Hugging Face and GitHub. Plus `tests/test_setup.py`, which checks the package imports, and `tests/conftest.py`, with shared test helpers. 170 tests pass in about a minute on a normal computer.
+Tests: `tests/test_queue.py`, `tests/test_results.py` and `tests/test_runner.py`. That last one is great: it pretends to be several Kaggle sessions in a row, using a local folder in place of Hugging Face and GitHub. Plus `tests/test_setup.py`, which checks the package imports, and `tests/conftest.py`, with shared test helpers. 193 tests pass on a normal computer.
 
 > **📁 Files we just created**
 > - `gptlab/hub.py`: stores data and checkpoints on Hugging Face, keeping only latest and final.
