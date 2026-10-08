@@ -68,15 +68,18 @@ Per season: 57.1% / 52.0% / 47.1%. The reliability table shows predicted vs obse
 
 **Live 2026-27 (computed by me from the committed serving DB):** GW1–5, 50 matches, 21 correct (42.0%), log loss 1.050, 3 exact scores (6%). The model never picked a draw. Only GW4's run was stored before its first kick-off. GW1–3 were backfilled on 10 Sep, and GW5 was stored the morning after its Friday opener.
 
-**Tests:** 67 pass (the build doc says 55, so the code has grown since): features, models, the openfootball parser, pipeline + web, publication checks, teams.
+**Tests:** 98 in total: 97 pass in my run and 1 fails (`test_a_prediction_stored_after_kickoff_is_flagged`, which asserts the upcoming gameweek isn't yet late). Areas: features, models, the openfootball parser, pipeline + web, publication checks, teams, gameweek assignment, Wikidata managers, FPL snapshots.
+
+**Tested and not shipped (Oct 2026, README):** walk-forward over 2019-20 to 2025-26 (2,660 matches), paired bootstrap on log loss. The live version scored 0.9889 log loss and 52.4% accuracy. The gameweek fix, Understat xG, an injury proxy, Wikidata managers and a long-memory xG rating each moved log loss by −0.0013 to +0.0006, and every 95% interval crossed zero.
 
 ## Known weaknesses
 
-- **Injuries absent:** `unavailability.csv` is empty, so those features are gated out.
-- **Manager features learned from ~2 seasons** (spells only from 2025-26).
+- **Injuries absent from the model:** the FPL availability log (since 30 Sep 2026, changes only) has too little history to train on.
+- **Manager coverage thinner before 2016:** Wikidata gives 84% of club-matches overall, 57–68% for 2010–2015.
+- **Gameweek leak mostly closed:** `gameweeks.py` reassigns matches to the gameweek they're played in (190 moved). Future-result leaks fell from 258 to 6, none more than four days.
 - **No xG.** Shots on target is the proxy, and stats lag the season, so the live model is thinner than the backtested one.
 - **Draw handling:** argmax never picks a draw. That's fine for log loss, but it looks odd to users.
 - **Backtest from GW4 onward** excludes the hardest early weeks.
 - **Live record is tiny and mostly late.** Nothing to conclude yet.
 - **Full rebuild every run**, and PL-specific config.
-- **Doc drift:** README 204 features vs build doc 213. Build doc 55 tests vs 67 actual.
+- **Doc drift:** README 216 features vs build doc 213. Build doc 55 tests vs 98 actual.

@@ -86,7 +86,7 @@ It looks at each team's attack, the other team's defence, and home advantage. Re
 - **Flask**: a small tool for building the website.
 - **Vercel**: free hosting that puts the website online.
 - **GitHub Actions**: the free robot that runs everything every morning.
-- **pytest**: runs 67 automatic checks on the code.
+- **pytest**: runs 98 automatic checks on the code.
 
 ## 8. How Good Is It?
 
@@ -100,9 +100,9 @@ This season's live record is very small: 21 right out of 50 matches (42%) over t
 
 ## 9. What's Weak or Missing
 
-- Injuries aren't collected automatically yet, so the model doesn't know who's injured.
-- Manager history only starts from the 2025-26 season, so there's little to learn from.
-- There's no "expected goals" data. Shots on target are used instead.
+- Injury news is now recorded every day from the FPL website (since 30 September 2026), but the model doesn't use it yet. A few weeks of records is too little to learn from.
+- Manager history now comes from Wikidata, a free public database. It covers 84% of matches since 2010-11, but less of the older seasons.
+- There's no "expected goals" data. It was tested in October 2026 and didn't measurably help, so shots on target are still used instead.
 - The model almost never picks a draw. A draw is rarely the single most likely result, though the draw chance (usually 25–30%) is still shown.
 - The project's own documents disagree slightly on the number of features.
 

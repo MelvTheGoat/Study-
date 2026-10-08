@@ -105,7 +105,7 @@ From the repo's walk-forward backtest (predicting each gameweek knowing only wha
 
 Calibration is good: when the model says 65%, it happens about 65% of the time. Draws are almost never the pick. They show up as 25–30% probability instead.
 
-The live 2026-27 record so far, from the committed database: after five gameweeks, 21 of 50 outcomes are right (42%), with a log loss of 1.050. But only gameweek 4 was published fully before kick-off (the first three were backfilled when the site launched), and 50 matches is far too few to say anything.
+The live 2026-27 record so far, from the committed database: after five gameweeks, 21 of 50 outcomes are right (42%), with a log loss of 1.050. But only gameweek 4 was published fully before kick-off (the first three were backfilled when the site launched), and 50 matches is far too few to say anything. Gameweek 6 (from 10 October, after the international break) was forecast well before kick-off.
 
 ## What I learned
 
@@ -116,4 +116,6 @@ The live 2026-27 record so far, from the committed database: after five gameweek
 
 ## What's next
 
-The repo lists the gains in the order most likely to pay: automated injury and team news, older manager history, an expected-goals feed, and more timely match statistics.
+Since launch, three of those have been worked on. Player availability is now recorded every day from the FPL API, because FPL keeps no history of who was injured. Manager history now comes from Wikidata, covering 84% of matches since 2010-11. And matches are now placed in the gameweek they're actually played in, which closed a leak where 258 postponed results reached the features before they were played.
+
+An expected-goals feed and an injury proxy were built and tested over 2,660 matches, and neither was measurably better, so they weren't shipped. The availability log isn't a model feature yet, because a few weeks of history can't be trained on.

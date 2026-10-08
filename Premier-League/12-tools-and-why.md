@@ -100,7 +100,7 @@ It needs no passwords or secret keys, because it uses the access GitHub already 
 ### pytest
 **What it is:** a Python tool for running tests, which are small programs that check your code still does what it should.
 
-**Why it's used here:** the project has 67 tests. They cover the features, the models, reading openfootball's files, the pipeline and website, the publishing checks, and club names. If a change breaks something, a test fails before it reaches the public.
+**Why it's used here:** the project has 98 tests. They cover the features, the models, reading openfootball's files, the pipeline and website, the publishing checks, and club names. If a change breaks something, a test fails before it reaches the public.
 
 ---
 

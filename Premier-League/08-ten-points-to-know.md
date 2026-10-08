@@ -29,5 +29,5 @@ Repo: https://github.com/MelvTheGoat/Premier-League
 9. **Backtest (README, 1,050 matches): 52.1% vs 43.2% always-home, log loss 0.9948 vs 1.0061 Elo, well calibrated. Live GW1–5: 21/50, mostly backfilled.**
    *Why it matters:* know both numbers and their caveats.
 
-10. **Daily 06:00 UTC Action: skip if unchanged, else retrain, export a 1.4 MB read-only DB, render check, commit, fast-forward deploy branches, and verify the live site. 67 tests.**
+10. **Daily 06:00 UTC Action: skip if unchanged, else retrain, export a 1.4 MB read-only DB, render check, commit, fast-forward deploy branches, and verify the live site. It also syncs managers from Wikidata and records FPL availability daily. 98 tests.**
     *Why it matters:* "don't trust green CI" is a strong story.

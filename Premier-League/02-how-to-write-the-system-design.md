@@ -32,7 +32,7 @@ One line:
 |---|---|
 | Matches per gameweek | 10 |
 | Matches in DB | ~6,460 (all competitions, 2010-11 on) |
-| Features per match | ~200+ (README 204, build doc 213) |
+| Features per match | ~200+ (README 216, build doc 213) |
 | Training matches (GW6 run) | 6,130 |
 | Working DB | ~61 MB |
 | Serving DB | ~1.4 MB |
@@ -98,7 +98,7 @@ One line:
 ## Step 5: Bottlenecks (2 min)
 
 1. **Source lag** (stats, ratings): handled by column dropping and rating age.
-2. **Missing injuries:** the biggest accuracy gap.
+2. **Missing injuries:** the biggest accuracy gap. FPL availability is now recorded daily, but there isn't enough history to train on yet.
 3. **Deploy drift:** the branch rename caused 11 green runs on a stale site. Now checked live.
 4. **Full feature rebuild each run:** fine now (under a minute), but won't scale to many leagues.
 

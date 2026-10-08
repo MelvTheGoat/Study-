@@ -91,9 +91,9 @@ The player files are huge, so we don't keep them in the project. Instead, `scrip
 
 And then there are things you simply can't get from results, so we write them by hand into small CSV files in `data/manual/`:
 
-- `managers.csv`: when each manager started and left. These only go back to 2025-26.
+- `managers.csv`: when each manager started and left. These only went back to 2025-26, so later we'll replace them with a better source.
 - `european_participation.csv`: which clubs are in Europe each season, because a Thursday night in the Europa League changes Sunday.
-- `unavailability.csv`: key players missing each gameweek. Honestly, it ships empty. Injuries are the hardest thing to automate, so for now the model works without them.
+- `unavailability.csv`: key players missing each gameweek. Honestly, it shipped empty. Injuries are the hardest thing to automate, so we'll come back to them.
 
 We also write a test straight away: `tests/test_openfootball_parser.py`. It checks the text reader handles the different file formats correctly. If the reader is wrong, everything after it is wrong, so it's worth testing first.
 
@@ -458,22 +458,57 @@ And `check_live_site.py` is the real lesson: it checks the far end of the chain,
 
 ## And the tests
 
-Let's gather the tests in one place, since we made them step by step. There are 67 of them across six test files: the results reader, the team names, the facts, the models, the pipeline and website, and the publication checks. They all run on the small pretend league from `conftest.py`. If a change breaks something, a test fails before it reaches the public.
+Let's gather the tests in one place, since we made them step by step. There are 98 of them across nine test files: the results reader, the team names, the facts, the models, the pipeline and website, the publication checks, and (added later) gameweeks, managers and FPL records. They all run on the small pretend league from `conftest.py`. If a change breaks something, a test fails before it reaches the public.
 
 ## The last file: writing it all down
 
 There's one more file, and it's written last: `docs/HOW_IT_WAS_BUILT.md`. It's the project's own record of every design decision: what each requirement demanded, how it was met, and where it lives in the code. A lot of what I've told you today comes from it.
 
-One small honest note: it was written a little earlier than the final code, so some numbers are slightly behind. For example, it says 55 tests and 213 facts, while the code now has 67 tests and the README says 204 facts.
+One small honest note: it was written a little earlier than the final code, so some numbers are slightly behind. For example, it says 55 tests and 213 facts, while the code now has 98 tests and the README says 216 facts.
 
 > **📁 Files we just created**
 > - `docs/HOW_IT_WAS_BUILT.md`: the project's own record of its design decisions.
+
+## What we added after launch
+
+Once the season started, three of the gaps got worked on. Let's walk through them.
+
+**First, postponed matches.** A match is listed under the gameweek it was first scheduled in. But when it's postponed, it's actually played weeks or months later. So its result was showing up in the facts for matches that came *before* it, which breaks our golden rule.
+
+So we write `plpredict/data/gameweeks.py`. It puts every match in the gameweek it's actually *played* in, and keeps the original one as `original_matchday`. That moved 190 matches, and cut the leaks from 258 (the worst was 185 days into the future) down to 6, none more than four days.
+
+It fixed two other things too. A postponed match no longer freezes the website on an old gameweek, and the site now shows "Rearranged from GW8" next to it. We also get a new fact, `gameweek_fixtures`, so the model knows when a team plays twice in one gameweek.
+
+**Second, manager history.** Our hand-written `managers.csv` only covered about a season and a half, and it had a mistake in it. So we pull the history from Wikidata instead, a free public database anyone can edit.
+
+`plpredict/data/sources/wikidata_managers.py` asks Wikidata for every club's managers and keeps only the head coaches. `data/manual/team_wikidata.csv` tells it each club's Wikidata ID, and the answers are saved in `data/external/managers_wikidata.csv`. `scripts/sync_managers.py` runs this every morning, before the rest of the robot's work.
+
+Now 84% of matches since 2010-11 have a known manager, and nearly all of them from 2018-19 on. The old `managers.csv` stays, but only fills in what Wikidata misses. And because Wikidata can be slow to update, `plpredict/data/sources/manager_news.py` and `scripts/check_manager_news.py` watch BBC Sport headlines for a sacking. That only raises a flag for a person to check; it never changes the data.
+
+**Third, injuries.** The FPL website (the official fantasy football game) shows every player's status, like "injured" or "75% chance of playing". The catch is it keeps no history: once the news changes, the old news is gone.
+
+So `plpredict/data/sources/fpl.py` reads it, and `scripts/snapshot_fpl.py` saves it every day into `data/snapshots/fpl_availability.csv`. It only writes down what *changed*, so the file stays small. This started on 30 September 2026, and it isn't a model fact yet: a few weeks of records is too little to learn from.
+
+**And what didn't make it.** We also tried adding expected goals (xG) from Understat, an injury guess, and a longer-memory xG rating. We tested each one over 2,660 past matches, from 2019-20 to 2025-26, and none was measurably better. So they weren't shipped. Being willing to drop your own ideas is part of testing honestly.
+
+> **📁 Files we just created**
+> - `plpredict/data/gameweeks.py`: puts each match in the gameweek it's actually played in.
+> - `plpredict/data/sources/wikidata_managers.py`: pulls every club's managers from Wikidata.
+> - `data/manual/team_wikidata.csv`: each club's Wikidata ID.
+> - `data/external/managers_wikidata.csv`: the saved manager history.
+> - `scripts/sync_managers.py`: refreshes the manager history every morning.
+> - `plpredict/data/sources/manager_news.py`: reads BBC Sport headlines about managers.
+> - `scripts/check_manager_news.py`: flags a manager change Wikidata hasn't caught yet.
+> - `plpredict/data/sources/fpl.py`: reads player availability from the FPL website.
+> - `scripts/snapshot_fpl.py`: saves the day's availability changes.
+> - `data/snapshots/fpl_availability.csv`: the daily availability record.
+> - `tests/test_gameweeks.py`, `tests/test_managers.py`, `tests/test_fpl_snapshots.py`: tests for all three.
 
 ## So, how's it doing live?
 
 Let's be honest about the live season. After the first five gameweeks of 2026-27, it got 21 out of 50 matches right, which is 42%. But here's the catch: only gameweek 4 was truly published before kick-off.
 
-Gameweeks 1 to 3 were filled in afterwards, and gameweek 5 was saved after its first match. So it's far too early to judge anything. That's exactly why we have the "late" marker.
+Gameweeks 1 to 3 were filled in afterwards, and gameweek 5 was saved after its first match. So it's far too early to judge anything. That's exactly why we have the "late" marker. Gameweek 6, starting on 10 October after the international break, was forecast well before kick-off.
 
 It keeps us honest.
 
@@ -481,9 +516,9 @@ It keeps us honest.
 
 Every project has gaps, and it's good to know them:
 
-- **Injuries** aren't collected automatically. `unavailability.csv` is empty for now.
-- **Manager history** only starts from 2025-26, so there's not much to learn from yet.
-- **There's no "expected goals" data.** Shots on target stand in for it.
+- **Injuries** are now recorded daily, but there's too little history for the model to use yet.
+- **Manager history** is thinner before 2016.
+- **There's no "expected goals" data.** It was tested and didn't measurably help, so shots on target still stand in for it.
 - **Draws** are almost never picked, though the chance is always shown.
 - **It's Premier League only**, and it rebuilds all the facts from scratch every run. Fine now, but at a bigger scale you'd want to update only what changed.
 

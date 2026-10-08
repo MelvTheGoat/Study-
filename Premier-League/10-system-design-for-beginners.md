@@ -109,7 +109,7 @@ These come from the project's own report, testing three past seasons week by wee
 - **Late data.** Match stats arrive weeks late. Any fact missing for over half the week's matches is dropped for that run, and returns once the data catches up.
 - **The website quietly goes stale.** Once, every job looked fine while the live site sat out of date. Now the robot checks the real website every run.
 - **Old predictions wiped.** A rebuild could erase the record, so published history is restored before predicting.
-- **Missing context.** Injuries aren't collected yet, and manager history only starts in 2025-26.
+- **Missing context.** Injuries are recorded daily, but there's too little history yet.
 
 ## Quick Recap
 

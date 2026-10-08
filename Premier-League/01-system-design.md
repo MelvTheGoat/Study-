@@ -16,7 +16,7 @@ flowchart LR
         OF[openfootball/england<br/>results + fixtures<br/>PL, Champ, L1, cups]
         FD[football-datasets<br/>shots, cards, referee<br/>lags live season]
         FIFA[FIFA / EA FC ratings<br/>built offline to CSV]
-        MAN[data/manual/*.csv<br/>managers, unavailability,<br/>Europe, team aliases]
+        MAN[Wikidata managers,<br/>FPL availability log,<br/>manual: Europe, aliases]
     end
 
     ING[Ingest + name<br/>normalisation]
@@ -50,7 +50,10 @@ flowchart LR
 | openfootball reader | `data/sources/openfootball.py` | Parses results, fixtures, gameweeks and kick-off times for PL, Championship, League One, FA Cup and EFL Cup from a public git repo (cloned once, then `git pull`). | Free, current, no key. The one source needed to predict. |
 | Match stats | `data/sources/footballdata.py` | Shots, shots on target, corners, fouls, cards, referee. | Better form signals. Optional, and lags the live season. |
 | Squad ratings | `data/sources/fifa_ratings.py`, `scripts/build_squad_ratings.py` | Aggregates FIFA/EA FC player dumps into one club-per-season CSV (overall, attack, midfield, defence), standardised within season. | Quality on paper for promoted or rebuilt sides. |
-| Manual data | `data/manual/*.csv` | Manager spells (2025-26 on), unavailability (ships empty), European participation, team aliases. | Context you can't derive from results. |
+| Manual data | `data/manual/*.csv` | Manager spells Wikidata misses (gap-filling only), unavailability, European participation, team aliases, each club's Wikidata ID. | Context you can't derive from results. |
+| Manager history | `data/sources/wikidata_managers.py`, `scripts/sync_managers.py` | Pulls every club's managerial spells from Wikidata each morning, keeping only head coaches. Covers 84% of club-matches since 2010-11 (98–100% from 2018-19). A BBC headline check (`manager_news.py`) flags changes Wikidata hasn't caught, but never writes them. | Replaces a hand-kept file that only covered a season and a half, and had errors. |
+| Availability log | `data/sources/fpl.py`, `scripts/snapshot_fpl.py`, `data/snapshots/fpl_availability.csv` | Records every player's FPL status, chance of playing and news each day, changes only. | FPL keeps no history, so this is the only way to know what was known before kick-off. Not a model feature yet. |
+| Gameweeks | `data/gameweeks.py` | Puts each match in the gameweek it's actually *played* in, not the one it was first scheduled in. | Postponed matches were leaking results up to 185 days into the past, and could freeze the site. |
 | Team names | `data/teams.py` | Normalises club names across sources. | Different sources spell clubs differently. |
 | Ingest | `data/ingest.py`, `db.py` | Loads everything into SQLite. | One store for all later steps. |
 | Elo | `features/elo.py` | One rating scale across PL, Championship, League One and cups. K=20, home advantage 60, 25% regression to the mean between seasons, division offsets (Champ −180, L1 −320). | Solves the promoted-club problem: form carries across divisions. |
@@ -99,11 +102,12 @@ flowchart LR
 - **Backtested quality (from the repo's README, over 1,050 matches, 2023-24 to 2025-26, GW4+):** 52.1% outcome accuracy vs 43.2% always-home, log loss 0.9948 vs 1.0061 Elo-only, 8.2% exact scores, goals MAE 0.93, and good calibration. I didn't re-run the backtest. It needs the source archives.
 - **Live record so far (from the committed serving DB, 2026-27 GW1–5, 50 matches):** 21 correct (42.0%), log loss 1.050, exact score 6%. Home wins were only 36% of results. **Caveat:** GW1–3 were backfilled on 10 Sep after they were played, and GW5's run was stored after its first kick-off. Only **GW4** (3/10) was published fully in advance. Too small to judge.
 - **Draws are never the pick.** A draw is rarely the single most likely outcome. The model expresses them as probability (usually 25–30%).
-- **Injuries not automated:** `unavailability.csv` ships empty, so those features are absent.
-- **Manager history only from 2025-26**, so the manager effect is learned from ~2 seasons.
-- **No xG.** Shots on target is the stand-in.
+- **Injuries don't reach the model yet:** FPL availability has been recorded daily since 30 Sep 2026, but a few weeks of history can't be trained on.
+- **Manager history is thinner before 2016:** Wikidata covers 98–100% of matches from 2018-19, but 57–68% of 2010–2015.
+- **No xG.** Shots on target is the stand-in. Understat xG was tested in Oct 2026 and wasn't measurably better.
+- **Four additions were tested and none was measurably better** (walk-forward over 2019-20 to 2025-26, 2,660 matches; live version 52.4% accuracy, log loss 0.9889). Every 95% interval on the change crossed zero. The gameweek fix and Wikidata managers shipped for other reasons: a real leak removed, and a better data source.
 - **Squad ratings are a season stale** by construction. Their age is a feature.
-- **Doc numbers differ slightly:** the README says 204 feature columns, and `HOW_IT_WAS_BUILT.md` says 213 features.
+- **Doc numbers differ slightly:** the README now says 216 feature columns, and `HOW_IT_WAS_BUILT.md` says 213.
 
 ## What I'd change at 10x scale
 

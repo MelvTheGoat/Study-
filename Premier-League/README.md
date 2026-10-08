@@ -14,8 +14,8 @@ Predicts every Premier League match each gameweek (home/draw/away probabilities 
 | Models | 0.6 LightGBM + 0.4 multinomial logistic (outcome), Dixon-Coles Poisson (scoreline) |
 | Key idea | Context as features, not rules. Cross-division Elo for promoted clubs. |
 | Backtest (README) | 1,050 matches: 52.1% accuracy vs 43.2% always-home, log loss 0.9948 vs 1.0061 Elo |
-| Live 2026-27 | GW1–5: 21/50 correct. Only GW4 was published before kick-off. |
-| Tests | 67 passing |
+| Live 2026-27 | GW1–5: 21/50 correct. Only GW4 was published before kick-off. GW6 (from 10 Oct, after the international break) was forecast well in advance. |
+| Tests | 98 (97 pass in my run, 1 fails: the "made before kick-off is not late" check) |
 
 ## Files
 

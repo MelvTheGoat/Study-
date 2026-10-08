@@ -36,7 +36,7 @@ Cross-division Elo on one scale, carried between seasons with 25% regression to 
 A walk-forward backtest that replays the exact live procedure: 1,050 matches, 52.1% vs 43.2% always-home, log loss 0.9948 vs 1.0061 Elo-only, and a reliability table where 65% predictions happen about 65% of the time. Live this season, it's 21/50 after five gameweeks, but only one of those gameweeks was published before kick-off, so I don't lean on it yet.
 
 ### 8. "What's the weakest part?"
-Injuries. The availability file ships empty, so the model can't see team news, which the repo lists as the single biggest gain available. Manager history only starts in 2025-26, and there's no xG.
+Injuries. The model still can't see team news. FPL availability is now recorded daily, but a few weeks of history isn't enough to learn from. Manager history now comes from Wikidata, but it's thinner before 2016. And there's no xG: I tested it, and it wasn't measurably better.
 
 ### 9. "How do you handle data that arrives late?"
 Any feature populated for fewer than half the fixtures being predicted is dropped from that run's model and logged. It comes back when the source catches up. Squad ratings are carried forward, with their age as a feature.
@@ -65,5 +65,6 @@ A Poisson goals model with attack and defence ratings per team and a home advant
 | Backtest numbers from README | "Did you verify?" | "They come from the repo's walk-forward script. The live record is separate and small." |
 | Live 42% | "That's below the backtest." | "50 matches, mostly backfilled. The noise is huge at that size. I'd judge after a full season." |
 | Backtest starts at GW4 | "You skipped the hard weeks." | "Yes. The first weeks have little in-season data. I'd report them separately." |
-| No injuries | "Team news is everything." | "Agreed. It's the top item on the improvement list. The pipeline already treats a missing row as unknown, not fit." |
-| Doc drift | "204 or 213 features?" | "The docs differ. The feature set changes as sources come in. The run record lists the exact columns used." |
+| No injuries | "Team news is everything." | "Agreed. FPL keeps no history, so I now record availability every day. Once there's enough of it, it can be tested as a feature." |
+| Postponed matches | "What about rearranged fixtures?" | "Matches now go in the gameweek they're played in. Before that fix, 258 results leaked into earlier features. Now it's 6, none more than four days." |
+| Doc drift | "216 or 213 features?" | "The docs differ. The feature set changes as sources come in. The run record lists the exact columns used." |
