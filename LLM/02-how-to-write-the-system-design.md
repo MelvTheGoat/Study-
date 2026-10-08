@@ -128,4 +128,4 @@ x -> Norm -> Attention(causal, fused SDPA, optional RoPE / QK-norm) -> + x
 | Squash Hub history | Keep all checkpoints | Storage limits | No rollback |
 | Exact dedup | MinHash near-dedup | Cheap, and the source already near-deduped per crawl | Cross-crawl near-dups remain |
 
-Finish with: "No GPU runs yet. The smoke job is first in the queue, then the data job, then experiments A–E."
+Finish with: "The GPU smoke test has passed and measured the speeds. Next in the queue: the data job, then the efficiency benchmark and the learning-rate sweeps, then experiments A–E. About 46 GPU hours in total."

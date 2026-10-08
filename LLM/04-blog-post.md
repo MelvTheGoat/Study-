@@ -14,7 +14,7 @@ So I built **gptlab**: a from-scratch PyTorch project that trains decoder-only t
 - **D. Efficiency:** fp16, `torch.compile`, 1 vs 2 GPUs, batch size.
 - **E. Evaluation:** loss, perplexity, bits per byte, HellaSwag, samples.
 
-To be clear up front: **none of these have run yet.** The code is written and tested on CPU, and the first GPU job, a smoke test, is at the top of the queue. This post is about how the system is built and why.
+To be clear up front: **none of these experiments have run yet.** The code is written and tested, and the first GPU job, a smoke test, passed on Kaggle's 2× T4 on 7 October. This post is about how the system is built and why.
 
 ## The problem
 
@@ -133,9 +133,9 @@ MFU (model FLOPs utilisation) tells you how much of the GPU you actually use. I 
 
 ## What's next
 
-1. Run the smoke job on 2× T4: DDP, fp16, checkpoints, Hub resume, evaluation and log pushing.
+1. ~~Run the smoke job on 2× T4~~ **Done (7 October).** The first attempt hung for 12 hours in the data step (forked workers deadlocked), costing about 12 GPU hours. The fix: `spawn` workers that fail loudly, and a runner that stops jobs gone silent for 30 minutes. The second attempt passed every step in 12.5 minutes. It also found two bugs: the original HellaSwag file now returns 404 (it now comes from a fixed Hugging Face revision), and the data manifest miscounted characters.
 2. Build the full FineWeb-Edu dataset on a free CPU session (~2.6B tokens).
-3. Write `EXPERIMENTS.md` with the compute budget.
-4. Run experiments A–E and write `REPORT.md`, with every number linked to a run log.
+3. ~~Write `EXPERIMENTS.md` with the compute budget~~ **Done.** About 46 GPU hours for experiments A–E, from measured speeds: compiled fp16 on 2× T4 runs from about 625k tokens/s (2.9M params) to about 37k tokens/s (97.5M), at 11–20% MFU.
+4. Run experiments A–E and write `REPORT.md`, with every number linked to a run log. Stage 1, the efficiency benchmark and learning-rate sweeps, is queued.
 
-Until then, loss, perplexity, HellaSwag and MFU are all **not measured yet**.
+Until then, experiment loss, perplexity and HellaSwag are all **not measured yet**.

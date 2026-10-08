@@ -1,6 +1,6 @@
 # Training a Small LLM from Scratch: System Design for Beginners
 
-This project builds everything needed to train small ChatGPT-style models from scratch, on free computers. It covers preparing the text, building the model, training it, testing it, and a job system that survives the free computers switching off. The code is written and tested, but hasn't been run on a real GPU yet, so there are no results.
+This project builds everything needed to train small ChatGPT-style models from scratch, on free computers. It covers preparing the text, building the model, training it, testing it, and a job system that survives the free computers switching off. A first GPU test run has passed, but the real experiments haven't run yet, so there are no results.
 
 ## Key Terms
 
@@ -95,12 +95,12 @@ Training in a shortened number format needs a "loss scaler" so tiny numbers don'
 
 ### How We Know It's Working (Step 5)
 
-None of these have been measured yet, because there's been no GPU run.
+Speed has now been measured by the GPU test run. The scores below haven't, because the real experiments haven't run yet.
 
 - **Test loss**: the loss on the 0.5% of text the model never saw. Lower is better.
 - **Bits per byte**: the same idea, but fair to compare across different tokenizers.
 - **HellaSwag score**: a multiple-choice quiz about what happens next in a story. With 4 choices, guessing gets **25%**, and small models will sit near that.
-- **Tests**: 170 automatic checks pass on a normal computer in about a minute, including one proving that stopping and restarting gives the same model.
+- **Tests**: 193 automatic checks pass on a normal computer, including one proving that stopping and restarting gives the same model.
 
 ### What Can Go Wrong (Step 6)
 
@@ -115,4 +115,4 @@ None of these have been measured yet, because there's been no GPU run.
 - Train on free GPUs, saving checkpoints safely.
 - A single step number lets a job restart exactly where it stopped.
 - A job to-do list plus a results branch turns short sessions into long experiments.
-- Everything is built and tested, but not yet run on a GPU.
+- Built and tested, with a GPU test run passed.

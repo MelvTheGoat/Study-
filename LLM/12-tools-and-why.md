@@ -81,7 +81,7 @@ One choice stands out: the training code is written directly in PyTorch, without
 ### pytest
 **What it is:** a Python tool for running tests, which are small programs that check the code still works.
 
-**Why it's used here:** 170 tests pass on a normal computer in about a minute, with no GPU needed. They include a check that stopping and restarting training gives exactly the same model.
+**Why it's used here:** 193 tests pass on a normal computer, with no GPU needed. They include a check that stopping and restarting training gives exactly the same model.
 
 ### matplotlib *(Planned)*
 **What it is:** a Python tool for drawing charts.

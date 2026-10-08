@@ -6,7 +6,7 @@ Repo: https://github.com/MelvTheGoat/LLM
 
 ## Summary
 
-From-scratch PyTorch pipeline for training decoder-only transformers (~1M–100M params) on Kaggle 2× T4. It covers data prep (FineWeb-Edu → clean → hash split → 16k byte-level BPE → uint16 shards), a configurable GPT, a training loop with fp16 + GradScaler, DDP, gradient accumulation and exact resume, evaluation (val loss, perplexity, bits per byte, zero-shot HellaSwag), a throughput/MFU benchmark, and a job runner that survives session limits using the HF Hub and a git `results` branch. **170 tests pass on CPU (~54 s). No GPU runs yet.**
+From-scratch PyTorch pipeline for training decoder-only transformers (~1M–100M params) on Kaggle 2× T4. It covers data prep (FineWeb-Edu → clean → hash split → 16k byte-level BPE → uint16 shards), a configurable GPT, a training loop with fp16 + GradScaler, DDP, gradient accumulation and exact resume, evaluation (val loss, perplexity, bits per byte, zero-shot HellaSwag), a throughput/MFU benchmark, and a job runner that survives session limits using the HF Hub and a git `results` branch. **193 tests pass on CPU. The GPU smoke test passed on 2× T4 (7 Oct 2026); experiments A–E not run yet.**
 
 ~4,400 lines of Python in `gptlab/`, 24 commits, all on 27 Sep 2026. The default branch is `dev`.
 
@@ -79,7 +79,7 @@ kaggle/runner.ipynb  paste once, runs the queue
 
 ## How it's tested
 
-- **170 tests pass on CPU in ~54 s** (I ran them). There are 92 test functions, plus parametrized cases.
+- **193 tests pass on CPU** (I ran them), up from 170, including a CPU test of compiled DDP training with gradient accumulation and a resume.
 - Notable tests:
   - `test_resume_is_exact`: N straight vs N/2 + resume + N/2 gives identical losses, val losses and final weights (dropout on).
   - `test_resume_refuses_a_changed_config`.
@@ -87,15 +87,17 @@ kaggle/runner.ipynb  paste once, runs the queue
   - FLOP formula vs PyTorch's counter.
   - Tokenizer round-trip, shard header checks, cleaning and split behaviour, queue state rules, results branch writer.
   - A CPU DDP check so the multi-process path can be tested without GPUs.
-- **Evaluation of trained models: not measured in the repo yet.** No `results` branch, no logs, no `REPORT.md`.
+- **GPU smoke test (`results/smoke-2`, 7 Oct):** passed every step in 12.5 min. Measured compiled fp16 throughput on 2× T4 from ~625k tok/s (s1, 2.9M params, 11.4% MFU) to ~37k tok/s (s6, 97.5M, 20.1% MFU). Compile speedup 1.5–2.6×, fp16 2.7× fp32, 2 GPUs 1.74× one. Resume on GPU differs by ≤0.0121 loss over 200 steps vs ≤0.0137 between two identical runs, so it's within noise. Full numbers and the ~46 GPU-hour budget are in `EXPERIMENTS.md`.
+- **Evaluation of trained models: not measured yet.** No experiment runs and no `REPORT.md` yet.
 
 ## Known weaknesses
 
-- **No GPU run yet**, so none of the experiments have results.
-- **Exact resume is proven on CPU.** On GPU with fp16, `torch.compile` and cuDNN/SDPA kernels, bit-exactness isn't guaranteed. It's not tested on GPU yet.
+- **No experiment has run yet**, so none of the experiments have results. Only the smoke test has run on GPU.
+- **Exact resume is bit-identical on CPU only.** On GPU it isn't (non-deterministic kernels), but the measured resume difference sits within run-to-run noise.
+- **The first smoke attempt hung for 12 hours** (forked data workers deadlocked), costing ~12 of 30 weekly GPU hours. Fixed with `spawn`, loud worker failures, and a runner that stops silent or over-time jobs.
 - **Small models on HellaSwag** will sit close to 25%, so differences may be within noise without many seeds.
 - **Exact dedup only** across crawls.
 - **Git as a results store** is fine for a few sessions, but not for many concurrent writers.
 - **Squashing Hub history** removes old checkpoints permanently.
-- **Docs referenced but missing:** `REPORT.md`, `EXPERIMENTS.md`.
+- **`REPORT.md` doesn't exist yet**; it fills in as runs finish.
 - **Single data mix and one tokenizer size** for training (the comparison is only bytes/token).

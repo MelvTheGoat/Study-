@@ -5,7 +5,7 @@ Repo: https://github.com/MelvTheGoat/LLM
 1. **Trains GPT-style models of ~1M–100M parameters from scratch in plain PyTorch, on Kaggle 2× T4.**
    *Why it matters:* it shows you understand the full training stack, not just an API.
 
-2. **Status: all code built, 170 tests pass on CPU, no GPU runs yet, no results.**
+2. **Status: all code built, 193 tests pass on CPU, the GPU smoke test passed on 7 Oct 2026, experiments not run yet.**
    *Why it matters:* never quote a loss or benchmark score.
 
 3. **Data: FineWeb-Edu sample-10BT, light cleaning, exact dedup, 0.5% val split by text hash, ~2.6B train tokens planned.**
@@ -20,7 +20,7 @@ Repo: https://github.com/MelvTheGoat/LLM
 6. **Training: AdamW (decay on 2D only), warmup + cosine, fp16 + GradScaler, gradient accumulation, DDP with `no_sync`.**
    *Why it matters:* T4s have no bf16, so loss scaling is essential.
 
-7. **Exact resume: weights, optimiser, scaler, step and all RNG states. Data position = step number. Tested to bit-identical losses (on CPU).**
+7. **Exact resume: weights, optimiser, scaler, step and all RNG states. Data position = step number. Tested to bit-identical losses on CPU. On GPU, the resume difference is within run-to-run noise.**
    *Why it matters:* it's the core of surviving 11-hour sessions.
 
 8. **Atomic checkpoints (`.tmp` → rename → `LATEST`), Hub keeps only `latest/` + `final/`, and history is squashed.**

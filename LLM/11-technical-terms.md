@@ -139,7 +139,7 @@ The terms follow the path of the work: preparing the text, building the model, t
 ### Exact resume
 **What it means:** stopping training and restarting it later, with exactly the same result as if it never stopped.
 
-**Why it's needed here:** free sessions end after about 11 hours. A test proves that stopping and restarting gives identical results on a normal computer. It hasn't been tested on a GPU yet.
+**Why it's needed here:** free sessions end after about 11 hours. A test proves that stopping and restarting gives identical results on a normal computer. On the real GPUs it's not bit-for-bit identical, but the GPU test run showed the difference is no bigger than normal run-to-run noise.
 
 ### RNG state
 **What it means:** RNG means random number generator. Its state is where it is in its sequence of random numbers.

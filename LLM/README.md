@@ -4,7 +4,7 @@ Repo: https://github.com/MelvTheGoat/LLM
 
 ## In short
 
-A from-scratch PyTorch system that trains small GPT-style models (~1M–100M parameters) on free Kaggle GPUs, with exact stop-and-resume across 11-hour sessions and a job queue for experiments (scaling, ablations, stability, efficiency, evaluation). **All code is built and tested on CPU. No GPU runs yet, so no results.**
+A from-scratch PyTorch system that trains small GPT-style models (~1M–100M parameters) on free Kaggle GPUs, with exact stop-and-resume across 11-hour sessions and a job queue for experiments (scaling, ablations, stability, efficiency, evaluation). **All code is built and tested. The GPU smoke test passed on Kaggle's 2× T4 on 7 October 2026, and the experiment plan is written. The training experiments haven't run yet, so there are no experiment results.**
 
 ## Key facts
 
@@ -13,8 +13,8 @@ A from-scratch PyTorch system that trains small GPT-style models (~1M–100M par
 | Language | Python, PyTorch |
 | Data | FineWeb-Edu sample-10BT, 16k byte-level BPE, uint16 shards |
 | Hardware | Kaggle 2× T4 (fp16) |
-| Tests | 170 passing on CPU (~54 s) |
-| Results | Not measured yet (no `results` branch) |
+| Tests | 193 passing on CPU |
+| Results | Smoke test and speed benchmark done (`results` branch, `EXPERIMENTS.md`). Experiments A–E not run yet. |
 
 ## Files
 

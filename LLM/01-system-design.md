@@ -2,7 +2,7 @@
 
 Repo: https://github.com/MelvTheGoat/LLM
 
-> **Status:** the code for data, model, training, evaluation and the Kaggle job runner is written and tested on CPU. **No GPU run has happened yet.** There's no `results` branch yet, and every experiment in the README says "not run yet". So there are no loss curves, scaling fits or benchmark scores.
+> **Status:** the code for data, model, training, evaluation and the Kaggle job runner is written and tested. **The GPU smoke test passed on 2× T4 on 7 October 2026** (`results/smoke-2` on the `results` branch), and `EXPERIMENTS.md` now holds the measured speeds and the compute budget (about 46 GPU hours). **Experiments A–E haven't run yet**, so there are no loss curves, scaling fits or HellaSwag scores.
 
 ## The problem, in 3 lines
 
@@ -101,13 +101,15 @@ flowchart TB
 ## Trade-offs and limits
 
 - **Free hardware shapes everything.** T4s mean fp16 plus a loss scaler (no bf16), small models, and session limits. That's why exact resume, atomic checkpoints and deadline stops exist.
-- **Nothing has been run on a GPU yet.** Loss, perplexity, HellaSwag, MFU, tokens/s, and the tokenizer comparison are **not measured in the repo yet**.
+- **Only the smoke test has run on a GPU.** It measured speed: compiled fp16 on 2× T4 runs from about 625k tokens/s (s1, 2.9M params) to about 37k tokens/s (s6, 97.5M), with MFU of 11–20% against the T4's fp16 peak. `torch.compile` is 1.5–2.6× faster, fp16 is 2.7× faster than fp32, and 2 GPUs are 1.74× one GPU. Experiment loss, perplexity and HellaSwag are **not measured yet**, and the full dataset hasn't been built yet.
+- **The first smoke run hung for 12 hours** (data workers forked from a process with live download threads, and deadlocked), costing about 12 of the 30 weekly GPU hours. Fixed with `spawn` workers that fail loudly, and the runner now stops jobs that go silent for 30 minutes or pass their time limit.
+- **Resume on GPU isn't bit-exact**, because some GPU kernels sum in a varying order. Over 200 steps, a stop-and-resume differed by at most 0.0121 in loss, against 0.0137 between two identical uninterrupted runs. So the resume adds nothing beyond run-to-run noise.
 - **Small models will score near chance on HellaSwag** (25% random). Useful as a trend across sizes, not as an absolute score.
 - **2.6B training tokens** is sized for a compute-optimal ~100M model with no repeats (per the data config). Bigger models would need more data.
 - **Exact dedup only.** Near-duplicates across crawls aren't removed (FineWeb removes them within a crawl).
 - **git branch as a results database** is simple and free, but pushes can conflict. Handled by fetch-reset-retry.
 - **Hub history squashing** deletes old checkpoints for good. That saves space but gives no rollback beyond `latest`.
-- **Planned docs missing:** `REPORT.md` and `EXPERIMENTS.md` are mentioned but don't exist yet.
+- **`REPORT.md` doesn't exist yet.** It's filled in as experiment runs finish. `EXPERIMENTS.md` now exists, with the plan and budget.
 
 ## What I'd change at 10x scale
 

@@ -10,14 +10,14 @@ Repo: https://github.com/MelvTheGoat/LLM
 >
 > The hard part is that Kaggle sessions end after 11 hours. So training stops itself early, saves atomically, including every process's random state, and the next session resumes exactly. There's a test showing that stop-and-resume gives bit-identical losses to training straight through. A job queue on a git branch lets many sessions work through experiments.
 >
-> 170 tests pass on CPU. The GPU runs, meaning scaling laws, ablations and HellaSwag, haven't happened yet, so I don't have result numbers to quote."
+> 193 tests pass on CPU, and the GPU smoke test passed on Kaggle's 2× T4. The experiments, meaning scaling laws, ablations and HellaSwag, haven't run yet, so I don't have result numbers to quote."
 
 ---
 
 ## Questions and honest answers
 
 ### 1. "Why write it from scratch instead of using Hugging Face?"
-To understand and control every piece: the loss, the init, the LR schedule, the checkpoint format. Ablations need that control. The cost is more code to test, which is why there are 170 tests.
+To understand and control every piece: the loss, the init, the LR schedule, the checkpoint format. Ablations need that control. The cost is more code to test, which is why there are 193 tests.
 
 ### 2. "Why a 16k vocabulary?"
 My models are 128 to 768 wide. With 32k tokens, the embedding and output layers would hold most of a tiny model's parameters. The data job also measures bytes per token for 8k, 16k and 32k, so I can show the trade-off with numbers once it runs.
@@ -64,10 +64,10 @@ Loss falling as a power law in parameters and compute, which I'd compare with th
 
 | Weak spot | Likely poke | Honest answer |
 |---|---|---|
-| No GPU results | "So does it actually train?" | "It trains on CPU in the tests. The GPU smoke run is first in the queue. No real results yet." |
-| Resume tested on CPU only | "GPU kernels aren't deterministic." | "Right. Bit-exactness is proven on CPU. On GPU I'd expect tiny differences and would measure them." |
+| No experiment results | "So does it actually train?" | "The GPU smoke test passed: the whole pipeline ran on 2× T4 in 12.5 minutes and measured the speeds. The real experiments are queued. No experiment results yet." |
+| Resume isn't bit-exact on GPU | "GPU kernels aren't deterministic." | "Right, and I measured it. Over 200 steps a resume differed by at most 0.0121 in loss, while two identical runs differed by 0.0137. So the resume adds nothing beyond normal noise." |
 | Tiny models on HellaSwag | "Won't that be ~25%?" | "Close to it for the smallest ones. It's useful as a trend across sizes, not an absolute score." |
 | Git as results DB | "That won't scale." | "Agreed. It's fine for a few sessions. I'd move to a tracker at scale." |
-| Missing REPORT/EXPERIMENTS docs | "README mentions files that don't exist." | "They're planned after the smoke test, and the README says so." |
+| Missing REPORT | "Where are the results?" | "`EXPERIMENTS.md` has the plan, measured speeds and a 46 GPU-hour budget. `REPORT.md` fills in as runs finish." |
 
-**Rule:** for any loss, perplexity, HellaSwag or MFU number, say "not measured yet. The pipeline to measure it is built and tested."
+**Rule:** speed and MFU are measured now (from the smoke test). For any experiment loss, perplexity or HellaSwag number, say "not measured yet. The pipeline to measure it is built and tested."

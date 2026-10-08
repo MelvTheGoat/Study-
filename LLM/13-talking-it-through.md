@@ -2,7 +2,7 @@
 
 *No computer, no slides. Just you and me, talking through how this project was built, from the very first step to the last. As we go, I'll name every file we create and why we need it. Look for the 📁 boxes: they list the files made in each step. Now and then I'll show you a few lines of the real code, but you don't need them to follow along.*
 
-*One thing up front: all of this is built and tested on a normal computer, but it hasn't been run on a real GPU yet. So there are no training results so far.*
+*One thing up front: all of this is built and tested, and a first GPU test run passed on 7 October 2026. But the real training experiments haven't run yet, so there are no experiment results so far.*
 
 ---
 
@@ -36,7 +36,7 @@ That's the list. The order is: settings, then data, then model, then training, t
 
 ## Step zero: set up the workshop
 
-First, a `README.md`, the front page. It lists the planned experiments, and honestly marks every one "not run yet". A `.gitignore` stops git saving big things like downloaded data and checkpoints.
+First, a `README.md`, the front page. It lists the planned experiments, and honestly marks each one "not run yet" until it has run. A `.gitignore` stops git saving big things like downloaded data and checkpoints.
 
 `requirements.txt` lists the tools: PyTorch, NumPy, PyYAML, tokenizers, huggingface_hub, pyarrow, matplotlib and pytest. One nice note in it: PyTorch's version isn't pinned, so Kaggle keeps its own GPU-ready build. `pyproject.toml` describes the project as a package.
 
@@ -45,7 +45,7 @@ The code lives in a folder called `gptlab`, with `__init__.py` files marking eac
 And `RUNNING.md` explains the one-time Kaggle setup: making a Hugging Face token, a GitHub token, and the notebook. After that, every run is one click.
 
 > **📁 Files we just created**
-> - `README.md`: the front page, with experiments marked "not run yet".
+> - `README.md`: the front page, marking each experiment "not run yet" until it runs.
 > - `.gitignore`: files git should not save, like data and checkpoints.
 > - `requirements.txt`: the tools to install.
 > - `pyproject.toml`: the project's package details.
@@ -271,17 +271,21 @@ Tests: `tests/test_queue.py`, `tests/test_results.py` and `tests/test_runner.py`
 
 ## So, how's it doing?
 
-No GPU run has happened yet, so there are no results. Not the loss, not the quiz score, not the speed. The `results` branch doesn't exist yet.
+The first GPU test run, the smoke job, has now happened. The first attempt froze in the data step until Kaggle stopped it 12 hours later, using about 12 of the 30 weekly GPU hours. The fix: start helper processes fresh, fail loudly if one dies, and stop any job that goes silent for 30 minutes.
 
-What *is* proven: 170 tests pass on a normal computer, including the exact-restart test and the batch-adding test.
+The second attempt, `smoke-2` on 7 October, passed every step in 12.5 minutes. It measured real speeds, from about 625,000 tokens a second for the smallest model to about 37,000 for the 97.5-million-parameter one. It showed restarting on a GPU isn't bit-for-bit identical, but the difference is no bigger than normal noise. And it found two bugs, both fixed: the quiz file had moved, and the data summary miscounted characters.
+
+Those speeds went into a new file, `EXPERIMENTS.md`: the plan for five experiments, needing about 46 GPU hours. A new script, `scripts/make_configs.py`, writes all the experiment settings in `configs/exp/` from one table. The real experiments, and their loss and quiz scores, haven't run yet.
+
+What *is* proven: 193 tests pass on a normal computer, including the exact-restart test and the batch-adding test.
 
 ## What's still missing?
 
-- **No GPU run yet**, so no results at all.
-- **Exact restarts aren't proven on a GPU**, where tiny differences can creep in.
+- **No experiment has run yet**, so no loss or quiz results. Only the smoke test has run on a GPU.
+- **Restarts on a GPU aren't bit-for-bit exact**, though the difference is within normal noise.
 - **Only exact copies of pages are removed**, not near-copies.
 - **Deleted checkpoints can't be recovered.**
-- **Two planned documents**, `REPORT.md` and `EXPERIMENTS.md`, are mentioned but don't exist yet.
+- **`REPORT.md` doesn't exist yet.** It fills in as experiments finish.
 
 ## Let's put it all together
 
@@ -297,7 +301,7 @@ Notice how it links. The single step number from the loader is what makes the ch
 
 The smoke job tests the restart on real hardware. Every piece supports the main challenge: long training on computers that keep switching off.
 
-That's the project. Everything's built and tested. The first GPU run is next.
+That's the project. Everything's built and tested, the GPU test run passed, and the real experiments are next.
 
 ## Where to go next
 

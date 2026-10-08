@@ -38,7 +38,7 @@ That's exactly the problem my project solves. The free computers I use (from a w
 
 ## Where it stands
 
-All the machinery is built and checked on a normal computer. **The real training on the free graphics computers hasn't been run yet**, so there are no scores to share. That's the next step, and I'll only report numbers that come from real runs.
+All the machinery is built and checked. **A first test run on the free graphics computers has now passed**, and it measured how fast training goes. The real training experiments haven't run yet, so there are no scores to share. That's the next step, and I'll only report numbers that come from real runs.
 
 ## What this shows about me
 

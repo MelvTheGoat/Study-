@@ -2,7 +2,7 @@
 
 This file explains the whole project in simple English, from start to finish. Read it first. After this, the other files in this folder will be much easier to follow.
 
-One thing to know up front: all the code is written and tested on a normal computer. But it has **not been run on a real GPU yet**, so there are no training results so far.
+One thing to know up front: all the code is written and tested. The first real GPU test run passed on 7 October 2026, and the speeds are now measured. But the real training experiments haven't run yet, so there are no experiment results so far.
 
 ## 1. The Problem
 
@@ -85,19 +85,21 @@ Even the random-number settings are saved. A test proves that stopping and resta
 - **Hugging Face Hub**: free storage for data and checkpoints.
 - **git results branch**: stores each job's status and logs.
 - **Kaggle**: free GPU sessions to run the jobs.
-- **pytest**: runs 170 automatic checks on a normal computer.
+- **pytest**: runs 193 automatic checks on a normal computer.
 
 ## 8. How Good Is It?
 
-There are **no training results yet**, because no GPU run has happened. The loss, the quiz score, the speed and the tokenizer comparison are all still waiting.
+The first GPU test run (a "smoke test" on a tiny slice of data) passed every step in 12.5 minutes on 7 October. The first attempt didn't: it froze in the data step until Kaggle stopped it 12 hours later, using up about 12 of the 30 free weekly GPU hours. The fix was to start helper processes fresh, and to stop any job that goes silent for 30 minutes.
 
-What *is* proven: 170 automatic tests pass in about a minute on a normal computer. They include the exact-restart test, and a check that adding up small batches gives the same result as one big batch.
+The smoke test also measured real speeds. The smallest model trains at about 625,000 tokens a second, and the 97.5-million-parameter model at about 37,000. Using both GPUs is 1.74 times faster than one. The full experiment plan now needs about 46 GPU hours. But the real experiments, and their loss and quiz scores, are still waiting.
+
+What *is* proven: 193 automatic tests pass on a normal computer. They include the exact-restart test, and a check that adding up small batches gives the same result as one big batch. On the real GPUs, restarting isn't bit-for-bit identical, because GPU maths adds numbers in a varying order. But the difference a restart makes is no bigger than the difference between two identical runs.
 
 When it runs, expect the tiny models to score close to 25% on the quiz. That's the same as guessing, since there are 4 choices. The quiz is useful for spotting a trend across model sizes, not as a final score.
 
 ## 9. What's Weak or Missing
 
-- No GPU run yet, so no results.
+- No training experiment has run yet, so no experiment results. Only the smoke test has run on a GPU.
 - Exact restarts are proven on a normal computer, but not yet on a GPU, where small differences can creep in.
 - Only exact copies of pages are removed, not near-copies.
 - Deleting old checkpoints saves space but means there's no going back.
@@ -122,7 +124,7 @@ When it runs, expect the tiny models to score close to 25% on the quiz. That's t
 7. One step number lets a job restart exactly where it stopped.
 8. Checkpoints are saved safely, so a crash can't ruin them.
 9. A to-do list of jobs plus a results branch connects many short sessions.
-10. Everything is built and tested, but nothing has run on a GPU yet.
+10. Everything is built and tested, the GPU smoke test passed, and the real experiments are next.
 
 ## Where to Go Next
 
