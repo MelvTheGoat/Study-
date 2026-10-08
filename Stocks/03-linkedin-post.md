@@ -1,11 +1,11 @@
 # Stocks: LinkedIn Post
 
-*About 60 words. Copy from the line below.*
+*About 70 words. Copy from the line below.*
 
 ---
 
-I'm building an AI helper that answers factual questions about US and Nigerian stocks, along with a test that measures how often it gets them right. So far I've built the part that logs, saves and retries every AI call, with 64 automatic tests behind it. The AI helper itself is next.
+I built a private website that helps me understand a company, American or Nigerian. It shows the key numbers from official reports, each with its source and date, and explains what every number means and how it can mislead. It runs eight warning checks, like cash burn and debt, but never says buy or sell. It updates itself every night for free.
 
 https://github.com/MelvTheGoat/Stocks
 
-#AI #LLM #Python
+#Investing #Python #Data

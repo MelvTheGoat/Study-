@@ -8,45 +8,40 @@ Repo: https://github.com/MelvTheGoat/Stocks
 
 ## What I'm building, in one sentence
 
-A computer assistant that answers factual questions about company shares, like "what was this company's share price on this day?", plus a fair test that checks how often it gets the answer right.
+A private website that helps me understand a company before I invest, by showing its key numbers from official reports and explaining what each one means, without ever telling me to buy or sell.
 
 ## The everyday comparison
 
-Think about hiring a new accountant.
+Think about buying a used car.
 
-You wouldn't hire them because they *sound* confident. You'd give them a test: ten questions where you already know the answers, marked the same way for every candidate.
+The shiny paint is like a company's share price chart: it's the first thing you see, and it tells you very little. What you really want is the service history, the mileage, and whether anything is about to break.
 
-AI chat tools are like a very confident new hire. They speak well, but they sometimes make numbers up. My project writes **the test first**, then builds the assistant, then marks it honestly.
+My website is like a friend who knows cars, standing next to you. They point at each part, say what it is, what a good one looks like, and what to watch out for. But they never say "buy it". That's your call.
 
-I'm also testing it on two kinds of companies:
-- **American companies** like Apple, which AI tools have read a lot about.
-- **Nigerian companies** on the Nigerian stock exchange, which AI tools know much less about.
-
-It's like testing someone on their home town and then on a town they've never visited. The difference shows how much they're *remembering* versus actually *working things out*.
+It works for two kinds of companies:
+- **American companies**, like Apple and Coca-Cola.
+- **Nigerian companies** on the Nigerian stock exchange.
 
 ## What's done so far
 
-This project is at an early stage. What's finished is the groundwork:
-
-1. **A settings file for every test run.** Each test is described in one small file. If there's a typo in it, the system refuses to run instead of quietly ignoring it. That keeps the results honest.
-2. **A careful way to talk to the AI.** It saves every answer, so repeating a test costs nothing. If the AI's computer is briefly busy it waits and tries again, but it doesn't keep retrying a question that can never work. It also keeps a record of every question asked and how long it took.
-3. **Automatic checks.** 64 small automatic tests make sure all of this works. They even run with the internet switched off, to prove nothing secretly depends on an outside website.
+1. **A page for each company.** It starts with a few plain sentences, so you get the picture in thirty seconds. Then you can tap for the details.
+2. **Every number shows where it came from**, and the date it describes. Anything out of date turns amber.
+3. **Eight warning checks**, like "Is it running out of cash?" and "Can it pay the interest on its debts?" Each one shows the rule it used.
+4. **It updates itself every weekday night**, for free, and sends me a phone message if something changes for a company I'm watching.
+5. **436 automatic tests** check the numbers are worked out correctly, using real company reports.
 
 ## What's not done yet
 
-- The **question-and-answer test** itself.
-- The **assistant** that answers questions.
-- The **share-price data**.
-
-There are no results yet, and I don't pretend there are.
+- I haven't added any Nigerian companies yet.
+- Nigerian share prices have to be typed in by hand for now.
 
 ## The tricky part
 
-Getting Nigerian share prices legally is harder than expected. The Nigerian stock exchange's website blocks automatic programs, and I won't sneak past that barrier. So I'm writing down every possible data source, checking its rules first, and only using sources that allow it.
+The Nigerian stock exchange's rules say you can't collect its data automatically without written permission, and its paid data costs money. I respect that. So instead, I download a company's results report myself, the normal way, and upload it. The website reads the main numbers out of it, double-checks them two ways, and marks them "not yet checked" until I've compared them with the report.
 
 ## What this shows about me
 
-- I care about **proving** things work, not just showing a nice demo.
-- I think about **fairness and honesty** in testing.
-- I respect **data rules** even when it slows me down.
-- I build solid **groundwork** before the flashy part.
+- I can turn complicated official data into something a normal person can understand.
+- I care about **trust**: every number shows its source, and nothing is guessed.
+- I respect **data rules and licences**, even when it's inconvenient.
+- I know when to **change direction**. This started as an AI project, and I turned it into something I'll actually use every day.

@@ -1,34 +1,33 @@
-# Stock Question Agent: System Design for Beginners
+# Stock Research: System Design for Beginners
 
-This project plans an AI helper that answers factual questions about US and Nigerian stocks, and, just as importantly, a way to measure how often it's right. It's at an early stage: the "plumbing" for talking to the AI is built and tested, but the AI helper itself isn't built yet. That makes it a great example of building the measuring stick *before* the thing you measure.
+This project is a private website that helps one person understand a company, American or Nigerian. It shows the key numbers from official reports, explains each one, and runs warning checks, but it never says buy or sell. It rebuilds itself every weekday night, for free. That makes it a great example of a simple "batch" system: do all the work once a night, then just show the results.
 
 ## Key Terms
 
-- **LLM (large language model)**: an AI that reads and writes text, like ChatGPT.
-- **Model**: the AI program itself, which has learned patterns from lots of text.
-- **Agent**: an LLM that can use tools, like a price lookup or a calculator, to finish a task.
-- **Evaluation (eval)**: a test of the AI using questions whose correct answers you already know. Like an exam with an answer sheet.
-- **Cache**: a saved copy of an answer, so you don't have to ask again.
-- **Retry**: trying a request again after it fails, because some failures are temporary.
-- **Config**: a settings file that describes one full test run.
-
-Throughout, **Built** means it exists in the code today, and **Planned** means it's designed but not written yet.
+- **Share price**: the cost of one small slice of a company.
+- **Company accounts**: the official reports of a company's sales, profit, cash and debts.
+- **Figure**: one number on the page, like profit or debt, with where it came from.
+- **SEC**: the US regulator that publishes every listed US company's accounts for free.
+- **NGX**: the Nigerian Exchange, where Nigerian shares are bought and sold.
+- **Batch job**: a program that runs at a set time, does all its work, then stops.
+- **Static website**: pages built in advance as plain files, with nothing running on a server.
+- **Stale**: out of date.
 
 ---
 
 ## Part 1: How to Approach It
 
-**Step 1: Understand the goal.** The goal is to measure honestly, not just to build a clever bot. Models know a lot about Apple and very little about Nigerian Breweries. So testing both shows how much of the model's skill is memory, not reasoning.
+**Step 1: Understand the goal.** The goal is understanding, not tips. The site must explain each number and never tell you to buy or sell.
 
-**Step 2: Figure out the data.** We need stock prices and company filings with known correct answers. The official Nigerian exchange website blocks automated access, so finding allowed data is the real challenge.
+**Step 2: Figure out the data.** US accounts are free from the SEC, and US prices are free from a service with limits. The Nigerian Exchange forbids automated collection, so Nigerian data must come another way.
 
-**Step 3: Sketch the main parts.** A config describes the run, an agent asks the model questions, and graders mark the answers. Every call to the model goes through a stack of helpers.
+**Step 3: Sketch the main parts.** Fetch the data, work out the figures, add explanations, build the pages, publish them privately.
 
-**Step 4: Walk through one question.** Follow one question from the config to the model and back, checking where it's saved and logged.
+**Step 4: Walk through one night.** Follow one company from "new report filed" to "updated page and a phone alert".
 
-**Step 5: Decide how to know it works.** Count how often answers are right, and record how long and how much each call took.
+**Step 5: Decide how to know it works.** Check the figures against real reports by hand, and test that every number has a source.
 
-**Step 6: Plan for problems.** The free computer time is limited, calls can fail, and runs can be killed halfway. Plan for each.
+**Step 6: Plan for problems.** Data can be late, free limits can run out, and licences can forbid sharing. Plan for each.
 
 ---
 
@@ -36,78 +35,86 @@ Throughout, **Built** means it exists in the code today, and **Planned** means i
 
 ### What It Needs to Do (Step 1)
 
-- Answer factual questions about **US** and **Nigerian (NGX)** stocks. *(Planned)*
-- Run the model on a free **Kaggle** GPU (a special computer chip that runs AI fast), with about **30 hours** a week. *(Planned)*
-- Never pay twice for the same question: save every answer. *(Built)*
-- Retry temporary failures up to **4** times. *(Built)*
+- Show a page for each company, with **29** figures and **8** warning checks.
+- Rebuild **every weekday night**, after the US market closes.
+- Mark a price as stale after **4** days, and accounts after **140** days.
+- Stay inside the free price plan: **800** requests a day, **8** a minute.
 
-How long can retries take at most? Step by step:
+How long does a brand-new company's first price download take? Step by step:
 
-1. The wait starts at 1 second and doubles each time: 1, 2, 4, 8 seconds.
-2. 1 + 2 + 4 + 8 = **15 seconds** at most.
-3. Each wait is also cut by a random amount (up to half), so it's often less.
+1. One company's full price history costs one request.
+2. The free plan allows 8 requests a minute.
+3. So 21 companies need about 21 ÷ 8 ≈ **3 minutes** for prices alone. Dividends and splits add more requests, and the setup guide says the first run can take up to an hour.
 
 ### The Big Picture (Step 3)
 
 ```
-   [Run Config]
-        |
-        v
-   [Agent: asks questions]   (Planned)
-        |
-        v
-   [Logger] --> [Cache] --> [Retry] --> [HTTP Client]   (Built)
-                                            |
-                                            v
-                              [Model on free GPU]   (Planned)
-        |
-        v
-   [Graders: mark answers]   (Planned)
+   [Watchlist: which companies]
+              |
+              v
+   [Fetch: SEC accounts + prices]  <---  [Nigerian PDFs, uploaded by you]
+              |
+              v
+   [Figures + warning checks]
+              |
+              v
+   [Explanations]
+              |
+              v
+   [Build web pages]  --->  [Private website]
+              |
+              v
+   [Compare with last night]  --->  [Phone alert]
 ```
 
 Step by step:
 
-1. A config file describes the run: which model, which questions, which kind of agent. *(Built)*
-2. The agent turns each question into a request for the model. *(Planned)*
-3. The Logger writes down the call: time taken, size, and whether it came from the cache. *(Built)*
-4. The Cache checks if this exact request was asked before. If yes, it returns the saved answer straight away. *(Built)*
-5. If not, Retry sends it on, and tries again if it fails in a temporary way. *(Built)*
-6. The HTTP Client (the part that sends messages over the internet) talks to the model server. *(Built)*
-7. Graders mark each answer as right or wrong. *(Planned)*
+1. Every weekday night, a free GitHub robot wakes up.
+2. It reads the watchlist: the companies to follow.
+3. It downloads new accounts from the SEC and new prices from Twelve Data, a price service.
+4. It works out the figures and runs the warning checks.
+5. It adds the explanations next to each figure.
+6. It builds plain web pages and puts them online behind a login.
+7. It compares tonight with last night, and sends a phone alert if something changed.
 
 ### The Main Parts (Step 3)
 
-**Run Config.** One settings file describes a whole run, and it's checked strictly. A typo like "temparature" causes an error instead of being quietly ignored. It's like a recipe card that refuses to be used if an ingredient is misspelled. Each config also gets a short ID code, so you can tell whether two results came from the same setup.
+**Watchlist.** A short file listing the companies to follow. You can edit it on GitHub. If you make a typo, the build stops and names the mistake, so a company never silently disappears. It's like a shopping list that complains if you write something unreadable.
 
-**Logger.** It records every call: how long it took, how much text went in and out, and whether it was cached. It's like a till receipt for every question. Cost and speed are results too, not just accuracy.
+**Data Fetcher.** It asks the SEC for each company's accounts, and Twelve Data for prices. It only asks for prices it doesn't already have, so it stays inside the free limit. It's like only buying the milk you've run out of, not a whole new fridge.
 
-**Cache.** Each request gets a unique fingerprint made from *all* its settings. If the same request comes again, the saved answer is returned. It's like keeping your marked homework, so re-checking it doesn't mean doing it again. Files are written safely, so a run killed halfway can't leave a broken half-file.
+**Figure Maker.** It turns raw reports into figures like profit margin and debt. Every figure remembers where it came from and the date it describes. If a figure can't be worked out, it says why, like "No P/E: the company made a loss". It's like a careful student who shows their working, and writes "can't answer, because…" instead of guessing.
 
-**Retry.** Some failures are temporary (the server is busy), and some are permanent (the request is wrong). It only retries the temporary kind. It's like redialling when the line is busy, but not when you've dialled a wrong number.
+**Warning Checks.** Eight checks look for trouble, like shrinking sales or running out of cash. Each one shows its rule, so you can disagree. It's like a car's dashboard lights, with the manual printed next to each one.
 
-**Fake Clients for Tests.** Tests use a pretend model that gives scripted replies. One special fake fails the test if it's called at all. That proves some paths never reach the real model.
+**Explanations.** Fixed, hand-written text explains each figure: what it is, what to compare it with, and how it misleads. A test makes sure none of it ever says "buy". It's like a museum label next to every painting.
 
-**Graders and Agent (Planned).** Graders will check numbers within a small tolerance, exact answers, and whether the source is right. The plan has three kinds of agent: model only, model plus given notes, and model plus tools.
+**PDF Reader for Nigerian Companies.** You upload a company's results PDF. It reads the main numbers, checks they add up two ways, and marks them "not yet checked" until you've looked. It's like a helper who copies figures for you, but you still sign them off.
 
-The planned model is squeezed to 4-bit to fit on the free GPU (advanced - skip for now).
+The PDF reader picks the right column by matching one number across two different statements (advanced - skip for now).
+
+**Website.** Plain pages built in advance, with a few sentences at the top and details you tap to open. It sits behind a login, because the price data is for personal use only. It's like a private notebook that rewrites itself every night.
 
 ### How We Know It's Working (Step 5)
 
-- **Tests**: 64 automatic checks pass in about 1.5 seconds. They run a second time with the internet blocked, to prove no test secretly uses it.
-- **Accuracy**: the share of questions answered right. **Not measured yet**, because the question set doesn't exist.
-- **Cost and speed per call**: will come from the Logger. Cached answers are marked, so they don't make the speed look better than it is.
+- **Tests**: 436 automatic checks pass in about 12 seconds.
+- **Real reports**: tests use real SEC filings from Apple, Coca-Cola, JPMorgan, GoPro and McDonald's. Next to each expected number, a comment shows the sum, so a person can check it by hand.
+- **Every number has a source**: a test checks every figure has a source or a reason it's missing.
+- **No advice**: a test checks no explanation contains words like "buy" or "undervalued".
+- **No internet in tests**: the tests run a second time with the internet blocked.
 
 ### What Can Go Wrong (Step 6)
 
-- **The data is blocked.** The official Nigerian exchange site uses a bot filter. The project refuses to sneak around it, and records every source it checked in a notes file.
-- **The GPU time runs out.** With about 30 hours a week, wasted calls hurt. The cache means re-grading costs nothing.
-- **A run is killed halfway.** Kaggle can stop sessions. Safe file writing means the cache is never left broken.
-- **Results that wobble.** If answers change randomly, you can't spot small improvements. So the settings default to the most predictable mode.
+- **The free price limit runs out.** The fetcher stops at 700 requests and carries on the next night.
+- **Data goes out of date.** Old prices and accounts turn amber, and the summary says so.
+- **The saved data is lost.** The next run downloads it again and catches up in a night or two.
+- **Nigerian data isn't allowed to be collected.** So you upload PDFs yourself, and prices are typed in by hand.
+- **A scanned PDF has no text.** The reader says so, and those figures must be typed in.
 
 ## Quick Recap
 
-- Build the measuring stick (the eval) before the thing you measure (the agent).
-- Every model call goes through log, cache, retry and send, in that order.
-- Strict configs catch typos before they mislabel results.
-- Only temporary failures are retried, so no GPU time is wasted.
-- Today the plumbing is built and tested, while the agent, data and graders are planned.
+- It's a nightly batch job that builds a private website.
+- Every figure shows its source and date, or why it's missing.
+- Eight warning checks show their rules, and nothing ever says buy or sell.
+- US data is fetched for free; Nigerian figures come from PDFs you upload.
+- Tests use real reports, so the numbers can be checked by hand.

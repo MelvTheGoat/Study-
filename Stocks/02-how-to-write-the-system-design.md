@@ -2,28 +2,31 @@
 
 Repo: https://github.com/MelvTheGoat/Stocks
 
-Use this on a whiteboard or in an interview. Be clear about what's **built** (config + model client + CI) and what's **planned** (agent, eval, data, GPU runner).
+Use this on a whiteboard or in an interview. The system is a **nightly batch job that builds a static, private website**. There's no server answering requests.
 
 ---
 
 ## Step 1: Requirements (2–3 min)
 
 Say the problem in one line:
-> "An agent that answers factual questions about US and Nigerian stocks, and an eval that measures how often it's right. The eval comes first."
+> "A private site that helps one person understand a US or Nigerian company: sourced figures, plain explanations and warning checks, never buy or sell advice."
 
 **Functional**
-1. Answer questions like "What was X's closing price on date D?" or "What's X's market cap?"
-2. Cite where each number came from.
-3. Never give buy or sell advice.
-4. Score answers against known correct answers, the same way every time.
-5. Compare three setups: closed book (model only), retrieval, and a full agent with tools.
+1. A page per company: plain sentences first, details on tap.
+2. Every figure shows its source and date, or a sentence saying why it's missing.
+3. Eight warning checks, each with its rule written out.
+4. P/E against the company's own five-year history and against similar companies.
+5. What changed in the latest report.
+6. A watchlist, a compare page (up to four) and a data-freshness page.
+7. Phone alerts when a watched company changes.
+8. Nigerian companies from their own results PDFs.
 
 **Non-functional**
-- **Reproducible:** one YAML file defines a run, and results carry its fingerprint.
-- **Deterministic:** temperature 0, fixed seed.
-- **Cheap:** free GPU (Kaggle T4), about 30 GPU hours a week.
-- **Honest:** no number shown until a real run produced it.
-- **Legal data only:** no paid data, and no source whose terms forbid scraping.
+- **Trustworthy:** nothing guessed, stale data marked.
+- **Free:** every service on a free plan.
+- **Private:** behind a login, because the price data is for personal use.
+- **Legal data only:** no scraping a site whose terms forbid it.
+- **Hands-off:** rebuilds itself every weekday night.
 
 ---
 
@@ -31,74 +34,78 @@ Say the problem in one line:
 
 | Thing | Number | Source |
 |---|---|---|
-| GPU | 1 × T4, 16 GB | config comments |
-| Model | 7B parameters, 4-bit AWQ, ~5 GB | `configs/smoke.yaml` |
-| Context | 4,096 tokens | `max_model_len` |
-| GPU budget | ~30 hours/week | `llm/cache.py` comment |
-| Retries | up to 4, backoff 1 s → 30 s cap | `RetryingClient` |
-| Smoke run | 5 questions | `limit: 5` |
-| Eval size | **not built yet** | n/a |
+| Companies today | 3 watched + 18 tracked (US); 0 Nigerian | `watchlist.yaml` |
+| Figures per company | 29 | `metrics/core.py` |
+| Warning checks | 8 | `metrics/checks.py` |
+| SEC limit | 10 requests a second, contact email required | `sec_client.py` |
+| Twelve Data free plan | 800 a day, 8 a minute; budget 700 | `sync.py` |
+| Stale after | price 4 days, accounts 140 days | `company.py` |
+| P/E history | quarter ends over 5 years | `history.py` |
+| Build | weekdays, 01:17 UTC | `nightly.yml` |
+| Tests | 436 pass, 1 skipped | my run |
 
-**Say:** "Scale is tiny. The constraint is GPU time, not traffic, so caching and correct retries matter most."
+**Say:** "Scale is tiny. The constraints are free-plan rate limits and data licences, not traffic."
 
 ---
 
 ## Step 3: High-level boxes (3 min)
 
 ```
-[Run config YAML] -> [Agent loop] -> [Client stack: log -> cache -> retry -> HTTP] -> [vLLM on T4]
-                          |
-                          +-> [Tools: price lookup, calculator] -> [Data: NGX, US, SEC]
-[Eval set (frozen as-of date)] -> [Agent] -> [Graders] -> [Results + call log]
+[watchlist.yaml] --+
+[SEC] -------------+--> [Sync (cache)] --> [Assemble CompanyData] --> [Metrics + checks] --> [Explain] --> [Render HTML] --> [Cloudflare Pages + login]
+[Twelve Data] -----+                              ^                         |
+[PDF upload] --> [PDF reader: draft + 2 checks] --+                         +--> [Alerts: tonight vs last night] --> [ntfy]
 ```
-
-Mark which boxes exist: the config and the client stack are built. The rest is planned.
 
 ---
 
 ## Step 4: Deep dive on each part (8–10 min)
 
-### 4a. Run config
-- Pydantic with `extra="forbid"`, because a typo must fail rather than be ignored.
-- `fingerprint()` = first 12 characters of the SHA-256 of the sorted JSON dump.
-- Sections: `model`, `eval`, `agent`, `seed`.
+### 4a. The Figure type
+- Value, unit, currency, as-of date, sources, notes, stale flag.
+- Or a `missing` sentence shown in place of the number.
+- A test checks every figure for every test company has one or the other.
 
-### 4b. The client stack (the part that's built)
-Draw the layers and explain the order:
-1. **Logging (outermost):** every call, including cache hits, becomes one JSONL line.
-2. **Cache:** key = SHA-256 of the whole request. One file per key, sharded by the first 2 hex characters. Atomic write-then-rename.
-3. **Retry:** transient errors only (timeout, connection error, 429, 5xx). Exponential backoff with jitter.
-4. **HTTP:** OpenAI-compatible `/chat/completions`.
+### 4b. US accounts from the SEC
+- One "company facts" JSON per company. Only 10-K/10-Q. Latest filing wins per period (restatements).
+- Each figure maps to several SEC labels, chosen **per period** (Apple's revenue label changed in 2018).
+- Last twelve months = last full year + year-to-date − same part of last year. Q4 = year − nine months.
 
-Why this order: retries inside the cache means one cache entry per success. Logging outside the cache means re-runs are counted honestly.
+### 4c. US prices from Twelve Data
+- Incremental: only days not held yet. Stop at 700; carry on tomorrow.
+- Three traps: the split `ratio` field is inverted (use `from_factor / to_factor`, checked against the text), `end_date` is exclusive, and there's no adjusted close (adjust it yourself).
+- Never store today's unfinished bar.
 
-### 4c. Testing without a GPU
-- `FakeModelClient`: scripted replies, matched by substring or queued.
-- `NeverCalledClient`: proves a path skips the model.
-- CI runs the tests twice, the second time with sockets disabled.
+### 4d. Figures and checks
+- 29 figures, one function each. No P/E for a loss; no price-to-book for negative equity.
+- 8 checks with written rules, e.g. "Concern if operating profit covers interest less than 1.5 times; watch under 3."
 
-### 4d. The eval (planned; describe the design)
-- Splits: `dev` (tune), `test` (only at the end), `hard` (hand-checked).
-- A frozen `as_of` date, so "this year's return" has one answer forever.
-- Graders: `numeric` (within tolerance), `exact`, `source` (the right citation).
+### 4e. Context
+- P/E history: five years of quarter ends, the middle half, and where today sits.
+- Peers: by SIC code, widening 4 → 3 → 2 digits. US peer search cuts the SEC industry list to major-exchange companies and ranks by revenue closeness.
 
-### 4e. The agent (planned)
-- `closed_book` and `retrieval` are baselines, `agent` has tools and `max_steps`.
-- An optional `self_check` pass, to be measured to see if it pays for itself.
+### 4f. Explanations
+- Hand-written glossary: what it is, what to compare it with, how it misleads.
+- Summary sentences built only from the company's own figures.
+- A test bans advice words ("buy", "undervalued", "you should").
 
-### 4f. Data (planned; the real blocker)
-- NGX site: behind a Sucuri bot filter, so not used.
-- african-markets.com: robots.txt allows it, but there's no terms page, so it needs a human decision.
-- US: SEC EDGAR needs a contact email in the User-Agent header.
+### 4g. Nigeria
+- NGX terms forbid automated collection, so prices are typed in.
+- Upload a results PDF → a workflow drafts the figures with page numbers → two checks (profit before tax matches; balance sheet balances) → marked unchecked until a person confirms → PDF deleted.
+
+### 4h. Publishing and alerts
+- Static HTML on Cloudflare Pages, behind Cloudflare Access (email one-time PIN).
+- A safety switch: no publishing until `SITE_IS_PRIVATE` is set.
+- Alerts compare snapshots and send one ntfy message.
 
 ---
 
 ## Step 5: Bottlenecks (2 min)
 
-1. **Data access:** NGX data is the hardest part, and it's not solved yet.
-2. **GPU time:** Kaggle session limits. Handled by the cache and atomic writes.
-3. **vLLM start-up:** connection refused while weights load. Handled by `is_ready()` plus transient retries.
-4. **Eval leakage:** tuning on the test split. Handled by split discipline (planned).
+1. **Twelve Data's free plan:** 8 a minute. Handled by incremental fetching and a nightly budget.
+2. **Lost cache:** the next run re-fetches and catches up over a night or two.
+3. **NGX data:** no free, allowed feed. Handled by PDFs and hand-typed prices.
+4. **SEC label drift:** handled by per-period label lists, each added because a real filing needed it.
 
 ---
 
@@ -106,10 +113,11 @@ Why this order: retries inside the cache means one cache entry per success. Logg
 
 | Chose | Over | Because | Cost |
 |---|---|---|---|
-| Eval first | Agent first | Stops fake progress | Nothing to demo yet |
-| Small open model on free GPU | Hosted frontier API | Free, reproducible, own weights | Weaker model, session limits |
-| File cache | Redis/DB | Zero setup, survives on disk | Slow at huge sizes |
-| Strict config | Loose dicts | Typos can't mislabel results | More boilerplate |
-| Refuse to bypass the bot filter | Scrape anyway | Legal and ethical | No NGX data yet |
+| Static site built nightly | A live web app | Free hosting, nothing to keep running | Data is up to a day old |
+| Hand-written explanations | AI-generated text | Can be checked and tested | Must be written for every figure |
+| Show "why missing" | Fill in a guess | Trust | Some pages have gaps |
+| PDF upload + hand prices for Nigeria | Scraping NGX | Its terms forbid it | Manual work |
+| Free Twelve Data plan | Paid feed | Free | Slow first run, 800 a day |
+| Dropping the AI agent | Finishing it | A tool the owner uses every day | The earlier work was removed |
 
-Close with: "Next is the eval set and the NGX data source, then baselines, then the agent."
+Close with: "Next is adding Nigerian companies and deciding on a licensed Nigerian price feed."

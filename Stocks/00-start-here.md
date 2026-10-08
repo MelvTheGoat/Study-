@@ -1,128 +1,132 @@
-# Stock Question Agent: The Whole Project in Simple English
+# Stock Research: The Whole Project in Simple English
 
 This file explains the whole project in simple English, from start to finish. Read it first. After this, the other files in this folder will be much easier to follow.
 
-One thing to know up front: this project is at an early stage. Some parts are built and tested. Most of the main parts are only planned. This file tells you clearly which is which.
+One thing to know up front: this project changed direction. It started in September 2026 as an AI helper that would answer questions about stocks. On 6 October 2026 that was dropped, and it became a research website instead. This file describes the website.
 
 ## 1. The Problem
 
-AI chatbots can sound very sure of themselves and still be wrong. Ask one for a company's share price and it might make up a number that was never real. This is called a hallucination.
+Most people judge a share by its price chart. But a chart can't tell you if a company is making money, running out of cash, or drowning in debt. The numbers that can tell you are spread across long reports, full of words most people never learned.
 
-This project wants to build an AI helper that answers factual questions about stocks. It covers US stocks and Nigerian stocks (on the NGX, the Nigerian Exchange). Just as important, it wants to *measure* how often the helper is right.
+This project builds a private website for one person. You look up a company, American or Nigerian, and it shows you the important numbers. Next to each one, it explains what the number means, what to compare it with, and how it most often misleads.
 
 ## 2. The Big Idea
 
-The big idea is "build the measuring stick first". Before building the clever AI helper, build the test that will grade it. Then every later change can be measured fairly.
+The big idea is "teach while you look". The site doesn't just show numbers; it explains each one while you read it. The goal is that you get better at reading companies by using it, until you don't need the explanations.
 
-There's also a clever twist. AI models have read a lot about Apple, and very little about Nigerian Breweries. So comparing the two shows how much of a model's skill is memory, and how much is real reasoning.
+And it **never tells you to buy or sell**. If you want to know whether to buy, it lays out the inputs instead: what you pay for the company's profit, which way the business is going, whether it can pay its debts, and what changed recently. The decision stays yours, because making it yourself is how you learn.
 
 ## 3. What's Built and What's Planned
 
 **Built today:**
-- A strict settings file that describes one full test run.
-- The "plumbing" for talking to an AI model: logging, saving answers, and retrying failures.
-- Pretend AI models for testing.
-- 64 automatic tests, and automatic checks on every code change.
+- Company pages for US companies, with figures, explanations, warning checks, price-to-profit history and a comparison with similar companies.
+- A home page with your watchlist, a page to compare up to four companies, and a page showing how fresh each company's data is.
+- A nightly job that fetches new data, rebuilds the site, and sends you a phone alert if something changed.
+- A way to add Nigerian companies: upload a results PDF and the tool drafts the figures for you to check.
+- 436 automatic tests.
 
-**Planned, not built yet:**
-- The AI helper (the agent) itself.
-- The set of test questions with known answers.
-- The graders that mark answers right or wrong.
-- The data collection for stock prices.
-- Running the real AI model on a free computer.
+**Not done yet:**
+- No Nigerian company has been entered yet.
+- Nigerian share prices have to be typed in by hand. Paying for a licensed price feed is left as the owner's decision.
+- The setup steps for putting the site online are written, but the repo doesn't show whether it's live yet.
 
-So right now there are no results at all. The project's README honestly says "not run yet".
+## 4. How It Works, Step by Step
 
-## 4. How It Will Work, Step by Step
+**Step 1: Choose the companies.** A simple list file, `watchlist.yaml`, names the companies to follow. You can edit it right on GitHub. It currently watches Apple, Coca-Cola and McDonald's, and tracks 18 other big US companies.
 
-**Step 1: Pick a settings file.** One file describes the whole run: which model, which questions, and which kind of helper. It's checked strictly, so a typo causes an error instead of being ignored. *(Built)*
+**Step 2: Fetch the data every weekday night.** A free GitHub robot wakes up after the US market closes. It downloads company accounts from the SEC, the US regulator, and new share prices from Twelve Data, a price service with a free plan.
 
-**Step 2: Load the test questions.** Each question has a known correct answer, fixed to a certain date, because share prices change every day. *(Planned)*
+**Step 3: Find similar companies.** For each watched US company, it finds others in the same industry, still trading on a major exchange, and closest in size by sales.
 
-**Step 3: Ask the AI.** The helper turns each question into a request for the model. *(Planned)*
+**Step 4: Work out the figures.** It turns the raw data into 29 figures, like the price-to-earnings ratio, profit margin and debt. Every figure carries where it came from and the date it describes. If a figure can't be worked out, it carries a sentence saying why.
 
-**Step 4: The request goes through the plumbing.** First it's logged. Then the saved answers are checked. If this exact question was asked before, the saved answer comes back straight away. If not, the request is sent, and retried if it fails in a temporary way. *(Built)*
+**Step 5: Run the warning checks.** Eight checks look for signs that a cheap share is cheap for a bad reason, like shrinking sales or running out of cash.
 
-**Step 5: The model answers.** It's planned to run on a free Kaggle computer with a GPU (a special chip that runs AI fast). *(Planned)*
+**Step 6: Write the explanations.** Fixed, hand-written text explains each figure. Short sentences about this particular company are built from its own numbers.
 
-**Step 6: Mark the answers.** Graders check numbers within a small margin, exact answers, and whether the right source was used. *(Planned)*
+**Step 7: Build the website.** It writes plain web pages, with small charts drawn in advance. Nothing needs to run on a server.
 
-**Step 7: Save the results**, labelled with a short code for the settings used. *(Planned)*
+**Step 8: Publish it privately.** The pages go to Cloudflare Pages, behind a login that only lets the owner's email in.
 
-## 5. The Clever Parts (Already Built)
+**Step 9: Send alerts.** It compares tonight with last night. If a watched company filed a report, failed a check, moved sharply in price, or stopped getting data, it sends one message to your phone.
 
-**Strict settings.** If you misspell a setting, like "temparature", most programs just ignore it. Your results would then be quietly mislabelled. This project refuses to run instead. Each settings file also gets a short ID code, so you can tell if two results came from the same setup.
+## 5. The Clever Parts
 
-**Never pay twice.** Free GPU time is limited to about 30 hours a week. So every answer is saved, keyed by a fingerprint of the *whole* request. Asking the same thing again costs nothing, and an answer made with different settings can never be reused by mistake.
+**Every number shows its source.** You can see which report each figure came from and the date it describes. Anything out of date turns amber: a price older than four days, or accounts older than 140 days.
 
-**Safe saving.** Free sessions can be stopped at any moment. Answers are saved to a temporary file first, then renamed in one step. So a half-written file can never appear.
+**Nothing is guessed.** There's no price-to-earnings ratio for a company making a loss, because it would be meaningless. When a figure is missing, the page says why in plain words.
 
-**Smart retries.** Some failures are temporary, like "server busy". Others are permanent, like a badly formed request. Only temporary ones are retried, waiting 1, 2, 4 then 8 seconds, so no GPU time is wasted.
+**Two layers on every page.** First come a few plain sentences, so you get the picture in thirty seconds. Then, under each heading, the detail opens when you tap it.
 
-**Honest speed numbers.** Saved answers are marked as saved. So they don't make the model look faster than it really is.
+**Explanations are written by hand.** They are not made up fresh by an AI each time. A test checks that every figure has one, and that no explanation ever contains advice like "buy" or "undervalued".
 
-**Tests that prove things.** One pretend model fails the test if it's ever called. That proves some code paths never reach the real model. The tests also run a second time with the internet blocked.
+**Respecting the rules.** The Nigerian Exchange's terms forbid automated collection. So the tool never scrapes it. Instead, you download a company's results PDF yourself and upload it, and the tool reads the figures out of it.
+
+**It checks its own reading.** When it reads a PDF, it checks that profit before tax matches on two different statements, and that the balance sheet balances. Every figure is marked "not yet checked" until you've compared it with the PDF.
+
+**A near miss, written down.** While checking the Nigerian Exchange's terms, a bug in reading the web page nearly made it look like there were no rules against collecting. The bug was found, and the rules were there. The project records this so it isn't repeated.
 
 ## 6. The Important Words
 
-- **LLM (large language model)**: an AI that reads and writes text, like ChatGPT.
-- **Hallucination**: when an AI confidently makes something up.
-- **Agent**: an AI that can use tools, like a price lookup or calculator.
-- **Evaluation (eval)**: testing the AI with questions whose answers you already know.
-- **Grader**: code that marks one answer right or wrong.
-- **Cache**: saved answers, reused instead of asking again.
-- **Retry with backoff**: trying again after a failure, waiting longer each time.
-- **GPU**: a special computer chip that runs AI fast.
-- **Config**: a settings file that describes one test run.
-- **Baseline**: a simple version to compare against, here "the model answering from memory alone".
+- **Share price**: the cost of one small slice of a company.
+- **Market value (market cap)**: the price of the whole company: share price times the number of shares.
+- **P/E ratio**: share price divided by profit per share. How many years of today's profit you're paying for.
+- **Revenue**: all the money from sales, before costs.
+- **Free cash flow**: cash left after running the business and paying for equipment.
+- **Last twelve months**: the most recent full year of figures, worked out from the latest reports.
+- **Peers**: similar companies to compare against.
+- **Stale**: out of date.
+- **SEC**: the US regulator that publishes every listed company's accounts.
+- **NGX**: the Nigerian Exchange, where Nigerian companies' shares trade.
 
 ## 7. The Tools, in One Line Each
 
 - **Python**: the language everything is written in.
-- **Pydantic**: checks the settings strictly.
-- **PyYAML**: reads the settings files.
-- **httpx**: sends questions to the AI model.
-- **pytest and pytest-socket**: run the tests, including with the internet blocked.
-- **ruff**: tidies the code and spots small mistakes.
-- **GitHub Actions**: runs the checks on every change.
-- **vLLM (planned)**: will run the AI model fast.
-- **Qwen2.5-7B (planned)**: the open AI model to be tested.
-- **Kaggle (planned)**: free GPU time.
+- **httpx**: downloads data from the SEC and Twelve Data.
+- **Parquet and DuckDB**: store prices in files and read them with database queries.
+- **Jinja2**: fills in the web page templates.
+- **pypdf**: reads text out of results PDFs.
+- **PyYAML**: reads the watchlist and the Nigerian company files.
+- **pytest and ruff**: test the code and keep it tidy.
+- **GitHub Actions**: runs the nightly build, the PDF reader and the tests.
+- **Cloudflare Pages and Access**: host the site for free, behind a login.
+- **ntfy**: sends free alerts to your phone.
 
 ## 8. How Good Is It?
 
-There are no results yet. How often the AI is right, how fast it is, and what it costs have **not been measured**. The question set doesn't exist yet.
+This is a tool for reading companies, not a prediction model, so there's no accuracy score. What can be measured is whether its numbers are right.
 
-What *is* proven: the plumbing works. All 64 tests pass in about 1.5 seconds.
+436 automatic tests pass in about 12 seconds. They use real SEC filings from Apple, Coca-Cola, JPMorgan, GoPro and McDonald's. Wherever a test expects a number, a comment shows the sum from the filing, so a person can check it by hand. The PDF reader was tried on one real report, NGX Group's own first-quarter 2026 results, and read every main figure correctly.
 
 ## 9. What's Weak or Missing
 
-- Most of the system doesn't exist yet: the agent, the questions, the graders and the data.
-- The data is the real blocker. The official Nigerian exchange website blocks automated visitors, and the project refuses to sneak around that.
-- Another possible data source has no terms of use page, so it isn't used yet.
-- US data sources haven't been investigated yet.
-- An earlier version of the project, built with different tools, was deleted to start again in Python.
+- No Nigerian company has been added yet, and Nigerian prices must be typed in by hand.
+- Scanned PDFs (pictures of pages) can't be read, so those figures must be typed in too.
+- The PDF reader has only been tried on one real report.
+- The US price data is licensed for personal use, so the site must stay private.
+- The first nightly run can take up to an hour, because the free plan allows only 8 price requests a minute.
+- Some older code from the AI-agent days is still there but unused, like a check that compares two price sources.
 
 ## 10. What This Project Shows You Can Do
 
-- Think about measurement *before* building.
-- Build careful, reliable plumbing for calling AI models.
-- Save money and computer time with smart caching and retries.
-- Write tests that prove what code does *not* do.
-- Respect data rules, even when it slows you down.
+- Turn messy official data into numbers people can trust, with sources.
+- Design pages that explain, not just display.
+- Respect data rules and licences, even when it's inconvenient.
+- Build a free, automatic nightly system.
+- Know when to change direction and cut what isn't working.
 
 ## 11. Ten Things to Remember
 
-1. The goal is to measure how often an AI gets stock facts right.
-2. It compares US and Nigerian stocks, to separate memory from reasoning.
-3. The plan is to build the test before the AI helper.
-4. Today, only the plumbing and tests are built.
-5. Every model call goes: log, then saved answers, then retry, then send.
-6. Strict settings turn typos into errors.
-7. Saved answers mean re-grading costs nothing.
-8. Only temporary failures are retried.
-9. There are no results yet.
-10. Finding allowed Nigerian stock data is the biggest challenge.
+1. It's a private website for understanding one company at a time.
+2. It covers US and Nigerian companies.
+3. It explains every number, and never says buy or sell.
+4. Every figure shows its source and date, or why it's missing.
+5. Eight warning checks separate "cheap and overlooked" from "cheap and failing".
+6. US accounts come from the SEC, and US prices from Twelve Data's free plan.
+7. Nigerian figures come from PDFs you upload, checked two ways.
+8. It rebuilds itself every weekday night, for free.
+9. 436 tests pass, using real filings.
+10. It started as an AI agent project and was changed on 6 October 2026.
 
 ## Where to Go Next
 

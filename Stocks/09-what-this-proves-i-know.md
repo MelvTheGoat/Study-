@@ -4,132 +4,129 @@ Repo: https://github.com/MelvTheGoat/Stocks
 
 ---
 
-## 1. LLM evaluation (evals)
+## 1. Reading company accounts
 
-**Simple explanation:** a fixed set of questions with known answers, graded the same way every time, so you can compare models and changes fairly.
+**Simple explanation:** the three main statements (income, balance sheet, cash flow) and how the key figures come out of them.
 
-**In this project:** designed in the config (`dev`/`test`/`hard` splits, frozen `as_of` date, `numeric`/`exact`/`source` graders). Not built yet.
-
-**Also be ready to explain:**
-- **Train/dev/test discipline**, and why you only run the test split once.
-- **Numeric tolerance grading** vs exact match.
-- **Grounding/citation checks:** is the source right, not just the number?
-- **LLM-as-judge**: when it helps and why it's risky.
-- **Contamination:** the model may have seen the answers during training (the US vs NGX angle).
-- **Baselines:** closed book vs retrieval vs agent.
-
----
-
-## 2. Agents and tool use
-
-**Simple explanation:** a loop where the model can call tools (like a price lookup or a calculator), read the results, and decide when it's done.
-
-**In this project:** planned (`agent.kind = agent`, `max_steps`, `tools`, `self_check`).
+**In this project:** 29 figures worked out from SEC filings and Nigerian results PDFs, from margins and cash conversion to interest cover and cash runway.
 
 **Also be ready to explain:**
-- **ReAct-style loops** (reason → act → observe).
-- **Function/tool calling formats.**
-- **Stopping rules** and step limits.
-- **Self-verification** passes, and how to measure whether they're worth the cost.
-- **Why tools help** with facts the model can't know (prices after its training cut-off).
+- **Profit vs cash flow**, and why a profitable company can still run out of cash.
+- **Free cash flow** = operating cash flow minus spending on equipment.
+- **Net debt** and **interest cover**.
+- **Why banks are different**: borrowing and lending is their business, so debt and margins mean something else (the tool explains them differently).
+- **Dilution**: new shares shrink every existing holder's slice.
 
 ---
 
-## 3. Reliable API clients (retries, backoff, idempotency)
+## 2. Valuation basics
 
-**Simple explanation:** retry only failures that might succeed next time, wait longer each time, and add randomness so clients don't all retry together.
+**Simple explanation:** what you pay for a company compared with what it earns or owns.
 
-**In this project:** `RetryingClient` and the transient/permanent split in `OpenAICompatibleClient`.
+**In this project:** P/E from market cap ÷ last twelve months' profit, price-to-book, dividend yield, five years of P/E history, and comparison against peer medians.
 
 **Also be ready to explain:**
-- **HTTP status classes:** 4xx (client error) vs 5xx (server error), and 429 (rate limit).
-- **Exponential backoff with jitter**, and the "thundering herd" problem.
-- **Idempotency:** why retrying a read is safe but retrying a payment isn't.
-- **Timeouts** vs connection errors.
-- **Circuit breakers.**
+- **Why a P/E needs a profit** (no P/E for a loss).
+- **Relative valuation**: against the company's own past and against peers.
+- **Value traps**: cheap because the market has seen a problem.
+- **Median vs mean** for peer groups, and the interquartile range.
 
 ---
 
-## 4. Caching
+## 3. Financial data engineering
 
-**Simple explanation:** save answers so you don't pay for the same work twice.
+**Simple explanation:** turning raw official data into clean, dated, trustworthy figures.
 
-**In this project:** a disk cache keyed by a full-request SHA-256, sharded folders, atomic writes, corrupt-file-as-miss.
+**In this project:** SEC company facts parsed to one value per period (latest filing wins), labels chosen per period, TTM and single quarters derived, prices stored as Parquet and read with DuckDB with merge-on-key writes.
 
 **Also be ready to explain:**
-- **Cache keys and invalidation:** why the key must include every setting that affects the answer.
-- **Atomic writes** (write temp, then rename).
-- **Content-addressed storage.**
-- **Cache hit rate** and how it skews latency stats.
+- **XBRL** tags and why companies use different ones.
+- **Restatements** and point-in-time data.
+- **Idempotent writes**: running a job twice gives the same result as once.
+- **Split and dividend adjustment**, and why a bonus issue is treated like a split.
 
 ---
 
-## 5. Reproducibility and experiment tracking
+## 4. Working with rate-limited APIs
 
-**Simple explanation:** anyone should be able to re-run an experiment and get the same result, and know exactly what settings produced it.
+**Simple explanation:** staying inside what a free service allows, and catching its quirks.
 
-**In this project:** one YAML per run, strict validation, config fingerprint, temperature 0, fixed seed, JSONL call log.
+**In this project:** the SEC's 10-a-second limit and contact-email header; Twelve Data's 800 a day and 8 a minute, handled with incremental fetching and a 700-request nightly budget.
 
 **Also be ready to explain:**
-- **Determinism limits on GPUs** (non-deterministic kernels, batch effects).
-- **Experiment trackers** (MLflow, Weights & Biases) and what they add.
-- **Config management** (Pydantic, Hydra).
+- **Budgets and carry-over** to the next run.
+- **Silent wrong answers** from APIs: the inverted split field, the exclusive end date.
+- **Validating a response** before trusting it (the brotli near miss).
 
 ---
 
-## 6. Serving open models (vLLM, quantisation)
+## 5. Data provenance and honest UX
 
-**Simple explanation:** run your own model on a GPU and expose it through a standard chat API. Shrink it (quantise) so it fits.
+**Simple explanation:** showing users where each number came from, how old it is, and what's missing.
 
-**In this project:** vLLM with an OpenAI-compatible endpoint, Qwen2.5-7B at 4-bit AWQ (~5 GB) on a 16 GB T4, fp16 because the T4 has no bf16.
+**In this project:** the `Figure` type with sources, as-of dates, notes, a stale flag and a `missing` sentence; amber for stale data; two-tier pages (sentences first, detail on tap).
 
 **Also be ready to explain:**
-- **KV cache:** what it is and why it limits context length and batch size.
-- **Quantisation:** AWQ vs GPTQ vs 8-bit, and the accuracy trade-off.
-- **Continuous batching** and PagedAttention (why vLLM is fast).
-- **Latency vs throughput.**
+- **Progressive disclosure** in interface design.
+- **Why "unknown" must never look like "fine"** (checks that can't run aren't counted as passed).
+- **Accessible charts**: the same numbers in a table.
 
 ---
 
-## 7. Testing with fakes
+## 6. Rule-based checks
 
-**Simple explanation:** replace slow or costly parts (like a GPU model) with predictable stand-ins so tests are fast and reliable.
+**Simple explanation:** fixed, written rules that flag warning signs.
 
-**In this project:** `FakeModelClient`, `NeverCalledClient`, httpx mock transport, injected `sleep` and RNG, and a no-network CI pass.
+**In this project:** eight checks (price fall, sales trend, profitability, cash burn, debt payments, new shares, ease of selling, value against peers), each showing its rule and status (ok, watch, concern, info, unknown).
 
 **Also be ready to explain:**
-- **Fakes vs mocks vs stubs.**
-- **Dependency injection** and protocols (`ModelClient` is a `typing.Protocol`).
-- **Testing time-based code** without real waiting.
+- **Rules vs models**: rules are explainable and arguable, but hand-tuned.
+- **Thresholds** and why each one is shown to the user.
 
 ---
 
-## 8. Data sourcing, ethics and terms of use
+## 7. Data licensing, terms and ethics
 
-**Simple explanation:** check that you're allowed to collect data before you collect it.
+**Simple explanation:** checking you're allowed to collect and show data before you do.
 
-**In this project:** `DATA_SOURCES.md`, with robots.txt checks, terms checks, the WAF finding, the paid-portal decision and SEC User-Agent rules.
+**In this project:** `DATA_SOURCES.md` records every source with dates and terms. NGX forbids automated collection, so PDFs are uploaded by a person and deleted after reading. US prices are licensed for personal use, so the site is private and publishing is gated.
 
 **Also be ready to explain:**
-- **robots.txt** (what it is and isn't: it's not a licence).
-- **WAFs and bot challenges.**
-- **First-hand vs second-hand data**, and labelling.
-- **Licensing and redistribution limits.**
+- **robots.txt vs terms of use**: they aren't the same thing.
+- **Personal use vs redistribution.**
+- **Authorised data vendors** and why the source of resold data matters.
 
 ---
 
-## 9. Financial data basics
+## 8. Document extraction with a person in the loop
 
-**Simple explanation:** what the questions will be about.
+**Simple explanation:** reading numbers out of PDFs, then having a person confirm them.
 
-**Also be ready to explain:** share price vs market cap, adjusted vs unadjusted close (splits and dividends), total return, the P/E ratio, and why an **as-of date** is needed for any "current" figure. Also what SEC EDGAR filings are (10-K, 10-Q).
+**In this project:** `ngx/pdf.py` finds the three statements by their content, picks the year-to-date column by matching profit before tax, checks the balance sheet balances, and writes a draft with page references, marked unchecked.
+
+**Also be ready to explain:**
+- **Text PDFs vs scanned PDFs** (and when OCR would be needed).
+- **Self-consistency checks** as a cheap form of validation.
 
 ---
 
-## 10. CI/CD hygiene
+## 9. Static sites and serverless publishing
 
-**Simple explanation:** automatic checks on every push.
+**Simple explanation:** building all pages in advance as plain files, then hosting them.
 
-**In this project:** ruff lint, pytest, a no-network pytest pass, and an authorship check on files and commits.
+**In this project:** Jinja templates rendered nightly, SVG charts at build time, Cloudflare Pages behind Cloudflare Access.
 
-**Also be ready to explain:** branch filters (`branches-ignore` for data branches), `fetch-depth: 0` for history checks, and pip caching in Actions.
+**Also be ready to explain:**
+- **Static vs dynamic sites**, and when each fits.
+- **Zero-trust access** with email one-time codes.
+- **Progressive enhancement**: pages work without JavaScript.
+
+---
+
+## 10. CI/CD and scheduled jobs
+
+**Simple explanation:** automatic checks on every push, and jobs that run on a timetable.
+
+**In this project:** a nightly workflow (weekdays, 01:17 UTC) with the Actions cache as storage and a publish safety switch; a PDF inbox workflow; a workflow that fetches SEC fixtures on a runner; tests run twice, once with sockets disabled.
+
+**Also be ready to explain:** cron in GitHub Actions, cache keys and restore keys, secrets vs variables, concurrency groups, and why scheduled jobs pause after 60 days without activity.

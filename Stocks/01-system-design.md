@@ -2,108 +2,105 @@
 
 Repo: https://github.com/MelvTheGoat/Stocks
 
-> **Status: early.** What exists today is the run config, the model-calling plumbing, the tests and CI. The agent, the question set (eval), the data pipeline and the Kaggle runner are **planned but not built yet**. This document marks every part as **Built** or **Planned**.
+> **Status:** a working research website, rebuilt every weekday night. The repo started on 18 Sep 2026 as an eval-first AI agent for stock questions. On 6 Oct 2026 the agent, eval harness and Kaggle runner were removed, the package was renamed `research`, and it became this tool (merged to `main` on 8 Oct). The data layer from the earlier project was kept.
 
 ## The problem, in 3 lines
 
-Language models can sound confident and still make up a share price.
-This project will build an agent that answers factual questions about US stocks and Nigerian (NGX) stocks, and, more importantly, the evaluation that measures how often it's right.
-The Nigerian side matters because models know a lot about Apple and very little about Nigerian Breweries, so it shows how much of a model's skill is memory rather than reasoning.
+A price chart can't tell you whether a company makes money, burns cash or can pay its debts.
+This tool builds a private page for each company, US or Nigerian, with sourced figures, hand-written explanations and eight warning checks.
+It never advises buying or selling: it lays out the inputs to that decision so the reader learns to make it.
 
 ## Diagram
 
 ```mermaid
-flowchart LR
-    CFG[Run config YAML<br/>strict, fingerprinted<br/>BUILT] --> RUN
+flowchart TB
+    WL[watchlist.yaml<br/>watch / track / peers] --> SYNC
+    SEC[SEC EDGAR<br/>company facts, profiles,<br/>industry lists, frames] --> SYNC
+    TD[Twelve Data free plan<br/>prices, dividends, splits] --> SYNC
+    SYNC[pipeline/sync.py<br/>data/ kept in the Actions cache] --> ASM
 
-    subgraph RUN["Run (planned: Kaggle GPU job)"]
-        AG[Agent loop<br/>closed_book / retrieval / agent<br/>PLANNED]
-        TOOLS[Tools: price lookup,<br/>calculator, filings<br/>PLANNED]
-        GR[Graders: numeric,<br/>exact, source<br/>PLANNED]
-    end
+    PDF[Results PDF uploaded<br/>to ngx/inbox/] --> READ[ngx-inbox workflow<br/>ngx/pdf.py: draft + 2 checks]
+    READ --> EXT[ngx/extracted/TICKER.yaml<br/>checked: false]
+    NGXY[ngx/companies.yaml<br/>details, typed-in prices] --> ASM
+    EXT --> ASM
 
-    subgraph CLIENT["Model client stack (BUILT)"]
-        LOG[LoggingClient<br/>JSONL per call]
-        CACHE[CachingClient<br/>disk cache by request hash]
-        RETRY[RetryingClient<br/>backoff + jitter]
-        HTTP[OpenAICompatibleClient<br/>httpx]
-    end
-
-    VLLM[vLLM server<br/>Qwen2.5-7B-Instruct-AWQ<br/>on a T4, PLANNED]
-
-    DATA[Data: NGX prices, US prices,<br/>SEC EDGAR, PLANNED]
-    EVAL[Eval set: questions with<br/>known answers, frozen as-of date<br/>PLANNED]
-
-    AG --> LOG --> CACHE --> RETRY --> HTTP --> VLLM
-    AG --> TOOLS --> DATA
-    EVAL --> AG
-    AG --> GR --> RES[Results + call log<br/>PLANNED: results branch]
+    ASM[pipeline/assemble.py<br/>CompanyData per company] --> MET[metrics/<br/>29 figures, 8 checks,<br/>P/E history, peers, changes]
+    MET --> EXP[explain/<br/>glossary + summary sentences]
+    EXP --> SITE[site/view.py + render.py<br/>plain HTML, SVG charts]
+    SITE --> CF[Cloudflare Pages<br/>behind Cloudflare Access]
+    MET --> AL[pipeline/alerts.py<br/>tonight vs last night] --> NTFY[ntfy phone alert]
 ```
 
 ## Each part, and why it's there
 
-| Part | Status | What it does | Why it's there |
+| Part | Code | What it does | Why it's there |
 |---|---|---|---|
-| Run config (`config.py`) | Built | One YAML file defines a whole run: model, sampling, eval split, agent type, seed. Pydantic models with `extra="forbid"` reject unknown keys. `fingerprint()` gives a 12-character hash of the config. | A typo like `temparature` would otherwise be silently ignored and every result mislabelled. The fingerprint lets you tell if two results came from the same setup. |
-| `ModelClient` interface (`llm/base.py`) | Built | One `chat(request) -> response` shape for every model call. Two error types: `TransientModelError` (retry) and `PermanentModelError` (don't). | Tests use a fake, the GPU box uses a real one, and the code in between can't tell the difference. |
-| `ChatRequest.cache_key()` | Built | SHA-256 of the entire request, built from `dataclasses.asdict`. | A new field added later is automatically part of the key, so the cache can never serve an answer made with different settings. |
-| `OpenAICompatibleClient` | Built | Posts to `/v1/chat/completions` with httpx. Timeouts, connection errors, 429 and 5xx → transient. Other 4xx or a malformed body → permanent. `is_ready()` polls `/models`. | vLLM speaks this format, so the same client works on Kaggle and elsewhere. |
-| `RetryingClient` | Built | Exponential backoff with jitter (1 s base, 30 s cap, 4 retries). Only retries transient errors. | Retrying a bad request wastes scarce GPU time. Not retrying a 503 throws away a run. |
-| `CachingClient` + `ResponseCache` | Built | One JSON file per request, sharded into 256 folders. Write-then-rename so a killed session can't leave half a file. | About 30 GPU hours a week (per the code comments). Re-grading shouldn't cost a single model call. |
-| `LoggingClient` + `CallLog` | Built | Appends one JSON line per call: tokens, latency, cached or not, errors. | Cost and latency are results too. Logging sits above the cache, so cache hits are still counted. |
-| `build_client()` | Built | Stacks them: logging → cache → retries → HTTP. | Order matters. A call that fails twice then succeeds is cached once and logged once. |
-| `FakeModelClient`, `NeverCalledClient` | Built | Scripted replies for tests, and a client that fails the test if it's called at all. | Lets tests prove that a path does **not** reach the model. |
-| CI: tests (`tests.yml`) | Built | Ruff lint, pytest, then pytest again with sockets disabled. | A test that quietly starts using the network fails here, not on the day the service is down. |
-| CI: authorship (`authorship.yml`) | Built | Fails if any file or commit message contains AI-tool attribution strings. | Keeps the repo's authorship clean as a rule, not a habit. |
-| `DATA_SOURCES.md` | Built (research) | Records every data source checked, with dates and terms. | "Nothing gets collected until it has an entry here." |
-| NGX collector (`collectors/`) | Planned | The folder exists but is empty. | `ngxgroup.com` is behind a bot filter (Sucuri WAF), so it isn't used. `african-markets.com` is a candidate, but its terms are unconfirmed. |
-| US data | Planned | SEC EDGAR plus a free price source. | Not investigated yet. |
-| Eval set and graders | Planned | Questions with known answers, frozen to an as-of date. Graders: numeric, exact, source. | The core idea: build the measuring stick before the agent. |
-| Agent | Planned | Three kinds in the config: `closed_book`, `retrieval`, `agent` (with tools and an optional self-check pass). | The first two are baselines. The third is the real system. |
-| Kaggle runner | Planned | Would run vLLM on a free T4 GPU and read jobs from a queue. | Free GPU. The README lists this as "not started". |
+| Figure type | `company.py` | `Figure` = value, unit, currency, as-of date, sources, a `missing` sentence, notes, stale flag. `CompanyData` holds everything for one company. | Every number on a page can say where it came from, or why it isn't there. A test checks every figure has one or the other. |
+| Watchlist | `pipeline/watchlist.py`, `watchlist.yaml` | `watch` (home page + alerts), `track` (built, searchable, usable as peers), optional hand-picked `peers`. Mistakes are reported by name. | A company silently dropping off the list is worse than a build that stops. |
+| SEC client | `fundamentals/sec_client.py` | Sends a contact email in the User-Agent and stays under 10 requests a second. | The SEC returns 403 without the email. |
+| SEC parsing | `fundamentals/sec.py`, `concepts.py` | One value per figure per period from 10-K/10-Q filings; the latest filing wins (picks up restatements). Each figure maps to several SEC labels, chosen per period. | Companies change labels: Apple's revenue label changed in 2018. |
+| Periods | `fundamentals/financials.py` | Last twelve months = last full year + this year so far − same part of last year. Q4 = full year − nine months. Debt built from its parts on one balance-sheet date. | Filings don't give the periods readers want, and nobody reports Q4 on its own. |
+| Prices | `data/sources/twelvedata*.py`, `data/store.py` | Free plan: 800 requests a day, 8 a minute. Fetches only new days, under a 700-request budget; dividends and splits weekly. Stored as Parquet, read with DuckDB, merge-on-key writes. | Free, and re-running never duplicates data. Three API traps are guarded (see below). |
+| Sync | `pipeline/sync.py` | SEC accounts fetched nightly; ticker list, industry listings and frames weekly or monthly; prices incrementally. Never stores today's unfinished price bar. | Each source has a different budget. |
+| Peer search | `pipeline/peer_search.py` | The SEC's company list for the industry (SIC) code, cut to companies on a major exchange, ranked by closeness in revenue using the SEC frames file. | Of 100 companies filed under 3571 (computer makers), only six still trade. |
+| Figures | `metrics/core.py` | 29 figures: price, market cap, P/E, price-to-book, dividend yield, growth, margins, return on equity, cash flow, debt, interest cover, cash runway, share change, trading activity, price moves. | One function per figure, each tested. |
+| Warning checks | `metrics/checks.py` | Eight checks (price fall, sales trend, profitability, cash burn, debt payments, new shares, ease of selling, value against peers), each with its rule written out. | Tells "cheap and overlooked" from "cheap and failing". The reader can disagree with the rule. |
+| P/E history | `metrics/history.py` | P/E at each quarter end over five years, the middle half of that range, and where today's sits. | "Is 30 times profit expensive?" only has an answer against something. |
+| Peers | `metrics/peers.py` | Picks peers by industry code, widening from four digits to three to two (and saying which), and compares with their middle values. | Context against similar companies. |
+| Latest report | `metrics/changes.py` | Latest quarter against the same quarter a year earlier: sales, profit, cash, debt, shares. | The questions everyone asks when a report comes out. |
+| Explanations | `explain/glossary.py`, `explain/summary.py` | Hand-written "what it is / what to compare it with / how it misleads" for every figure. Summary sentences built from the company's own figures. | Fixed text can be checked; generated text can't. Tests ban advice words. |
+| Nigerian companies | `ngx/manual.py`, `ngx/pdf.py`, `scripts/read_ngx_inbox.py` | Reads hand-entered figures (each needs a source and page). The PDF reader finds the three statements, picks the year-to-date column by matching profit before tax with the cash flow statement, checks the balance sheet balances, writes a draft marked `checked: false`, then deletes the PDF. | NGX's terms forbid automated collection, so a person fetches the PDF and the tool only reads it. |
+| Website | `site/view.py`, `render.py`, `charts.py`, templates | Plain HTML from Jinja templates, light and dark themes, SVG charts drawn at build time with a table beneath, one small script. Tier 1 sentences show; tier 2 detail opens with `<details>`. | Static files cost nothing to host and work without the script. |
+| Alerts | `pipeline/alerts.py` | Compares tonight's snapshot of watched companies with last night's. One ntfy message if anything changed. | You hear about a new report or a failed check without checking the site. |
+| Nightly job | `scripts/build.py`, `.github/workflows/nightly.yml` | 01:17 UTC, Tuesday to Saturday. Restore cache, fetch, build, save cache, then publish only if `SITE_IS_PRIVATE` is `yes`. | The licence on US prices is personal use, so publishing waits until the login is in place. |
+| Test fixtures | `.github/workflows/sec-samples.yml`, `scripts/fetch_sec_samples.py`, `scripts/trim_sec_fixtures.py` | Fetches real SEC samples on a GitHub runner, pushes them to a `sec-samples` branch, and trims them to the labels the tool reads. | The SEC refuses requests from the development machine. |
 
 ## Tech stack
 
 | Tool | What it's used for | Why this one |
 |---|---|---|
-| Python 3.10+ | Everything | Standard for LLM tooling |
-| Pydantic v2 | Strict run config | Validation with clear errors. `extra="forbid"` catches typos. |
-| PyYAML | Config files | Human-readable run definitions |
-| httpx | HTTP client | Timeouts, and a pluggable transport so tests never open a socket |
-| pytest, pytest-socket | Tests | 64 tests pass in about 1.5 s. The second CI pass blocks the network. |
-| ruff | Lint | Fast. Rules E, F, I, UP, B. |
-| vLLM (planned) | Serving the model | Fast open-model serving with an OpenAI-compatible API |
-| Qwen2.5-7B-Instruct-AWQ (planned candidate) | The model | 4-bit weights (~5 GB) fit a 16 GB T4 with room for the KV cache. The config says the final pick is "settled in Phase 5". |
-| Kaggle (planned) | Free GPU | T4, no cost |
-| GitHub Actions | CI | Free |
+| Python 3.11+ | Everything | Standard for data work |
+| httpx | SEC and Twelve Data requests | Timeouts, and easy stand-ins in tests |
+| Parquet + DuckDB (pyarrow) | Price store | Plain files, real SQL, no server |
+| Jinja2 | HTML templates | Simple, static output |
+| pypdf | Reading results PDFs | Pure Python, reads text PDFs |
+| PyYAML | Watchlist and Nigerian data | Easy to edit on GitHub |
+| pytest, pytest-socket, ruff | Tests and lint | 436 tests pass (1 skipped); CI repeats them with sockets disabled |
+| GitHub Actions | Nightly build, PDF inbox, SEC samples, tests | Free; the Actions cache holds the data between runs |
+| Cloudflare Pages + Access | Hosting behind an email one-time-PIN login | Free for up to 50 users |
+| ntfy | Phone alerts | Free, no account |
 
-## Data flow, step by step (as designed)
+## Data flow, step by step
 
-1. **Pick a config**, e.g. `configs/smoke.yaml`. It's loaded and validated, and its fingerprint is taken. *(Built)*
-2. **Load the eval questions** for the chosen split and version, frozen at `as_of`. *(Planned)*
-3. **For each question, the agent builds messages.** `request_from_config()` fills in sampling settings from the config only. *(Built helper, planned agent)*
-4. **The call goes through the stack:** log → cache (hit: return saved answer) → retry → HTTP → vLLM. *(Built, except vLLM)*
-5. **In agent mode, the model may call tools** (price lookup, calculator) up to `max_steps`, with an optional self-check pass. *(Planned)*
-6. **Grade the answer:** numeric tolerance, exact match, and whether the cited source is right. *(Planned)*
-7. **Write results and the call log**, labelled with the config fingerprint, to a results branch. *(Planned)*
+1. **01:17 UTC, Tuesday to Saturday**, the nightly workflow starts and restores `data/` from the Actions cache.
+2. **Read the watchlist.** Any typo stops the build with a named error.
+3. **Sync.** SEC company facts for every company (free, 10 a second). Twelve Data prices only for days not held yet, stopping at 700 requests; the next night carries on. Dividends and splits weekly.
+4. **Peer search** for watched US companies, using the SEC industry listing and frames.
+5. **Assemble** a `CompanyData` for each company, including Nigerian ones from `ngx/companies.yaml` and `ngx/extracted/`.
+6. **Work out** 29 figures, 8 checks, the P/E history, peer comparison and latest-report changes. Mark stale figures (price over 4 days, accounts over 140 days).
+7. **Explain:** attach glossary text and build the summary sentences.
+8. **Render** plain HTML pages: home (watchlist), one per company, compare (up to four), and data freshness.
+9. **Save** the cache, check the site, and **publish** to Cloudflare Pages only if the login is in place.
+10. **Alert:** compare with last night and send one ntfy message if something changed for a watched company.
 
-The smoke config's own description says it's "not a measurement of anything". It only proves the pipe works end to end.
+Separately, uploading a PDF to `ngx/inbox/` starts the `ngx-inbox` workflow, which drafts the figures, deletes the PDF and commits the draft. That push triggers a rebuild.
 
 ## Trade-offs and limits
 
-- **Eval-first means slow visible progress.** There's no agent yet, so there's nothing to demo. That's a deliberate choice, but it's also the main limit today.
-- **No results exist.** The README says "not run yet" instead of placeholder numbers. Accuracy, latency and cost are **not measured in the repo yet**.
-- **Data access is the real blocker.** The official NGX site blocks automated access, and the second-hand source has no terms page. The project refuses to work around the bot filter.
-- **Free GPU budget** (about 30 hours a week on Kaggle, per the code comments) shapes everything: caching, retries and a small quantised model.
-- **One model is planned.** Only one candidate is named in the config so far.
-- **Earlier prototype removed.** An earlier Next.js version (a question-answering page over a small text corpus, with guardrails and naira formatting) was deleted on 27 Sep to start again in Python. None of it is in the current code.
+- **Nigerian prices are typed in by hand.** NGX's terms forbid automated collection without written consent, and its licensed feed costs money (end-of-day prices are N125,000 a year). A draft email to NGX asks about personal-use access. Paid options are listed in `DATA_SOURCES.md` for the owner to decide.
+- **No Nigerian company entered yet.** `ngx/companies.yaml` is empty and both `ngx` lists in the watchlist are empty.
+- **PDF reading tested on one real report** (NGX Group Q1 2026, both checks passed). Scanned PDFs have no text and must be typed in.
+- **Personal-use licence.** The US price data is licensed for personal use, so the site must stay behind a login and the repo should be private.
+- **Free-plan speed.** The first run fetches years of prices at 8 a minute and can take up to an hour.
+- **Live status unknown.** `DEPLOY.md` lists the setup steps (secrets, Cloudflare, the `SITE_IS_PRIVATE` switch); the repo doesn't show whether they've been done.
+- **Leftovers.** `calendar.py` and `crosscheck.py` are tested but not used by the site, and an Alpha Vantage parser remains from the earlier project.
 
 ## What I'd change at 10x scale
 
-At 10x the questions, models or users:
-- **Move serving off Kaggle** to a paid GPU host or a hosted inference API. Kaggle sessions have time limits and aren't a service.
-- **Batch requests.** vLLM is much faster with many requests at once. The current client sends one at a time.
-- **Replace the file cache** with a key-value store (e.g. Redis or S3 plus an index). One JSON file per call gets slow at millions of entries.
-- **Ship the call log to a real store** (e.g. a warehouse table) for cost dashboards.
-- **Version the eval set** in a dataset registry, with a strict dev/test split so the test set is never tuned on.
-- **Licensed market data.** At scale, scraping or second-hand data isn't acceptable. A proper data licence would be needed.
+At 10x the companies or users:
+- **A paid price feed** (Twelve Data paid, or EODHD for both markets). The free 800 a day would not cover thousands of companies.
+- **A licensed NGX feed**, so Nigerian prices aren't typed in.
+- **Real storage** instead of the Actions cache, such as object storage, so a lost cache doesn't mean a re-fetch.
+- **Per-user logins and watchlists** if it were shared, plus the licences that sharing would need.
+- **OCR** for scanned Nigerian PDFs, still with a person checking.
+- **Incremental builds:** only rebuild pages whose data changed.

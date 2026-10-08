@@ -1,151 +1,128 @@
-# Building the measuring stick before the agent: a stock question-answering project
+# A research tool that explains every number: US and Nigerian companies, without the advice
 
 Repo: https://github.com/MelvTheGoat/Stocks
 
 ## Why I built it
 
-Most language-model portfolio projects show a few good examples. That proves very little. A model can write a fluent answer about a company and still invent the share price in the middle of it. If you only look at the examples you picked, you'll never see it.
+Most people judge a share by its chart. The chart is the least useful thing about a company. What matters is whether it makes money, turns that money into cash, can pay its debts, and what you're paying for all of that.
 
-I wanted to build something that answers factual questions about stocks, like prices, market caps and returns, and I wanted to **know** how often it's right. Not guess, not show three nice screenshots.
+Those answers are in company reports, written in a language most people never learned. I wanted a tool that shows me the numbers that matter and explains each one while I look at it: what it is, what to compare it with, and how it usually misleads. The aim is that, after a while, I don't need the explanations.
 
-So this project is built the other way round: the evaluation comes first, and the agent comes second.
+There's one hard rule: **it never tells me to buy or sell.** Ask it "should I buy this?" and it lays out the inputs to that decision instead. Making the decision myself is how I learn to make it well.
 
-There's a second reason. The project covers US stocks and Nigerian stocks listed on the Nigerian Exchange (NGX). Large models have read a huge amount about Apple and very little about Nigerian Breweries or Dangote Cement. That gap is the interesting part. It lets me measure how much of a model's apparent skill is memory rather than reasoning, and whether giving it real data closes the gap.
+It covers US companies and Nigerian companies listed on the Nigerian Exchange (NGX), because that's what I want to understand.
 
 ## Where it stands, honestly
 
-This is early. Here's the status straight from the README:
-
 | Part | State |
 |---|---|
-| Repo, config, model client, CI | in progress |
-| NGX daily price collector | in progress (the folder is empty) |
-| Data pipeline (US + NGX) | not started |
-| Eval set | not started |
-| Kaggle runner | not started |
-| Baselines | not run yet |
-| Agent | not started |
-| Experiments | not run yet |
+| US company pages (figures, checks, P/E history, peers, latest report) | built and tested |
+| Home, compare and data-freshness pages | built |
+| Nightly build, Cloudflare publishing behind a login, phone alerts | built; setup steps in `DEPLOY.md` |
+| Nigerian companies from PDFs | built; no company entered yet |
+| Nigerian prices | typed in by hand for now |
+| Tests | 436 pass, 1 skipped |
 
-There are no results yet, and the README says "not run yet" rather than showing a placeholder number. This post is about the foundations and why they're shaped the way they are.
-
-I also started over once. The first version, a week earlier, was a Next.js web app with a small retrieval setup, guardrails and a naira formatter. On 27 September I deleted it and restarted in Python, because the real goal is an agent plus a serious eval that runs on a GPU. That's a Python world.
+This repo didn't start here. From 18 September it was an "eval-first" AI agent that would answer questions about stocks, with a question set, graders, a retrieval baseline and a GPU runner. On 6 October I removed the agent and the eval, kept the data layer, and turned it into this. A tool I'd use every day was worth more than a benchmark.
 
 ## The problem, broken down
 
-To measure an agent properly I need:
+To make a page I'd actually trust, I need:
 
-1. **A run definition that can't lie.** If a result says "temperature 0", it must have been temperature 0.
-2. **A model client that's cheap to re-run.** I have a free Kaggle GPU with roughly 30 hours a week. Re-grading shouldn't cost any model calls.
-3. **Retries that don't waste the budget.** Retry what might succeed next time, and never retry what won't.
-4. **A record of every call**: tokens, latency and whether it was cached, because cost and speed are results too.
-5. **Tests that never touch a GPU or the network.**
-6. **Data I'm allowed to use.**
-
-The first five are built. The sixth is the hard part.
+1. **Numbers that carry their own evidence**: a source and a date, or a reason they're missing.
+2. **Accounts in the periods people use**, like the last twelve months, which no filing hands over directly.
+3. **Prices that are correct after splits**, from a free source that's easy to misread.
+4. **Context**: today's figures against the company's own past and against similar companies.
+5. **Explanations I can check**, which never slip into advice.
+6. **Nigerian data I'm allowed to use.**
+7. **All of it free, private, and automatic.**
 
 ## How it works
 
-### One YAML file per run, and typos fail
+### Every number knows where it came from
 
-Every run is one YAML file: which model, which sampling settings, which eval split, which kind of agent, which seed. It's loaded into Pydantic models that **reject unknown keys**:
+The core type is a `Figure`. It's not just a value: it carries the unit, the currency, the date it describes, its sources, any notes on how it was worked out, and whether it's stale. If there's no value, it carries a `missing` sentence, and the page shows that sentence instead of a number. A test checks that every figure for every test company has one or the other.
 
-```python
-# Rejecting unknown keys is the whole point, so every model in this file shares
-# these settings.
-_STRICT = ConfigDict(extra="forbid")
-```
-
-Why does that matter? If I type `temparature: 0.7`, a loose loader would ignore it. The real temperature stays at the default while the file claims otherwise, and every number from that run is quietly mislabelled. That kind of error survives all the way into a report.
-
-Each config also has a fingerprint, a short SHA-256 of its contents. If two results disagree, the first question is "same config?", and the fingerprint answers it without a diff.
-
-### A stack of small clients
-
-Everything that talks to a model goes through one interface: `chat(request) -> response`. On top of the real HTTP client I stack three wrappers:
-
-```
-logging -> cache -> retries -> HTTP
-```
-
-The order is deliberate:
-- **Retries sit innermost.** A call that fails twice and then succeeds is cached once.
-- **The cache sits in the middle.** A repeated request returns the saved answer instantly.
-- **Logging sits outermost.** A cache hit is still logged as a question answered, just with zero GPU time. Counting only misses would make a re-run look free and a first run look expensive.
-
-### A cache key that can't go stale
-
-The cache key is a hash of the **entire** request:
+This is the price-to-earnings ratio refusing to guess, straight from the code:
 
 ```python
-def cache_key(self) -> str:
-    canonical = json.dumps(
-        dataclasses.asdict(self), sort_keys=True, separators=(",", ":"), default=str
-    )
-    return hashlib.sha256(canonical.encode()).hexdigest()
+if profit.value <= 0:
+    return Figure.absent(
+        "pe",
+        "multiple",
+        f"No P/E: the company made a loss over the twelve months to "
+        f"{fmt.long_date(profit.end)}. A P/E divides by profit, so it needs a profit.",
 ```
 
-I built it from `dataclasses.asdict` rather than a hand-written list of fields. If someone later adds a new sampling setting to the request, it's part of the key automatically. With a hand-written key, the day someone forgets to add it, the cache starts serving answers made under different settings, and no test would notice.
+The same rule runs everywhere: no price-to-book for negative equity, and no dividend yield of zero unless both the price data and the cash flow statement agree nothing was paid.
 
-Cache files are written to a temp file and then renamed. Kaggle kills sessions at the time limit, and a rename is atomic, so the cache can never hold half a file. If it somehow finds a broken file, it treats it as a miss.
+### US accounts, in the periods people want
 
-### Retry only what might work
+US companies' accounts come from the SEC's "company facts" files: every number a company has tagged in its filings, one file per company, free and public. The same number appears many times, in the original report, as last year's column in the next one, and again if it's restated. So for each period the most recently filed value wins.
 
-The HTTP client sorts every failure into one of two types:
+Companies also change the labels they use. Apple's revenue label changed in 2018. So each figure has a list of labels, best first, chosen separately for each period. Every label is there because a real filing needed it.
 
-```python
-# 429 means slow down, 5xx means the server is unwell or still warming
-# up. Everything else in the 4xx range is our own mistake.
-if response.status_code == 429 or response.status_code >= 500:
-    raise TransientModelError(f"HTTP {response.status_code}: {detail}")
-raise PermanentModelError(f"HTTP {response.status_code}: {detail}")
-```
+Filings don't give the periods readers want. A cash flow statement only reports the year so far, and nobody reports the fourth quarter on its own. So the tool works them out: the last twelve months is the last full year, plus this year so far, minus the same part of last year. The fourth quarter is the full year minus nine months.
 
-Timeouts and "connection refused" (which happens while vLLM is still loading weights) are transient. A 200 response whose body isn't a chat completion is permanent: something else is listening on the port, and asking again gets the same nonsense.
+### Prices, and three traps
 
-The retry wrapper uses exponential backoff with jitter:
+US prices come from Twelve Data's free plan: 800 requests a day, 8 a minute. The nightly job only asks for days it doesn't have, and stops at 700 so there's room to spare. Dividends and splits are checked weekly.
 
-```python
-ceiling = min(self.base_delay_s * (2**attempt), self.max_delay_s)
-return ceiling * (0.5 + 0.5 * self.rng.random())
-```
+That API has three traps, and each one gives confidently wrong numbers rather than an error. A split arrives with a `ratio` field that's the wrong way round: reading it would make Apple's split-adjusted returns wrong by a factor of sixteen. So the factor comes from `from_factor / to_factor`, and is checked against the number written in the description. The end date of a request is exclusive, and there's no adjusted close, so adjusting for splits is done in my own code.
 
-The jitter matters. If many requests fail at the same moment and all retry after exactly two seconds, they hit the overloaded server at the same moment again.
+### Eight warning checks
 
-### Tests that can prove the model *wasn't* called
+A share can look cheap because the market missed something, or because the market saw something. The checks look for the second kind. Each one shows its rule, so I can disagree with it.
 
-There are two fake clients. `FakeModelClient` returns scripted replies. It can match on part of the user's message, which matters for agent loops where the order of calls is exactly what's under test. When it runs out of replies it raises an error rather than returning something bland, because a silent fallback would turn "the agent took an extra step" into a passing test.
+| Check | Rule |
+|---|---|
+| Share price | Flags a fall of more than half over three years |
+| Sales trend | Concern if sales shrank over 5% a year over three years |
+| Profitability | Concern if it lost money this year and last |
+| Cash burn | Concern if the cash lasts under 18 months |
+| Debt payments | Concern if operating profit covers interest under 1.5 times |
+| New shares | Concern if the share count grew over 20% in three years |
+| Ease of selling | Whether enough shares trade to sell yours |
+| Value against peers | P/E against similar companies, as context, with no threshold |
 
-`NeverCalledClient` fails the test if anything calls it. That's how you prove a cached answer, or a refused question, never reached the GPU. An assertion on the output can't tell you that.
+### Context, not verdicts
 
-CI runs the whole suite twice, the second time with sockets disabled. If a test quietly starts calling a real service, it fails in CI, not on the day that service is down. Right now 64 tests pass in about a second and a half.
+"Is 30 times earnings expensive?" has no answer on its own. So each page shows the P/E at every quarter end for five years, the middle half of that range, and where today's sits. It also compares with similar companies, picked by industry code. For US companies, the tool finds those peers itself: the SEC's list of companies in that industry, cut to those still on a major exchange, ranked by closeness in sales.
+
+### Explanations written by hand
+
+Every figure has three short pieces of hand-written text: what it is, what to compare it with, and how it misleads. I chose fixed text over generated text, because being wrong about what a figure means is worse than not showing it. Fixed text can be read carefully and tested.
+
+The tests check every figure has an explanation, the sentences stay short, and no text ever contains advice words like "buy", "bargain", "undervalued" or "you should". The sentences about a particular company are built only from its own figures, so each one traces back to a number on the page.
+
+### A site with nothing to run
+
+The site is plain HTML, built every weekday night by GitHub Actions and published on Cloudflare Pages. Charts are drawn as pictures when the page is built, with the same numbers in a table underneath. Each page opens with a few plain sentences; the detail opens when you tap a heading.
+
+The price data is licensed for personal use, so the site sits behind Cloudflare Access, which emails a one-time code. There's also a safety switch: the nightly job won't publish at all until a setting says the login is in place. Each night it also compares watched companies with the night before, and sends one phone alert through ntfy if something changed.
 
 ## The hard part: data I'm allowed to use
 
-I wrote down a rule before collecting anything: every source goes into `DATA_SOURCES.md` with the date its terms were checked. No paid data, and no source whose terms forbid automated collection.
+Every source has to have an entry in `DATA_SOURCES.md` before anything is collected. For the Nigerian Exchange, that entry says no. Its terms forbid "any systematic or automated data collection" without written consent, and forbid republishing its data. Its licensed data service costs money: end-of-day prices are N125,000 a year.
 
-The NGX's own website turned out to be the problem. Every page, including the price list and all the terms pages, answers with a JavaScript bot challenge from a Sucuri firewall. A plain HTTP client never gets through, and a GitHub Actions runner would be treated even more harshly. I couldn't read the terms because they're behind the same wall, and there's no robots.txt.
+Reading those terms nearly went wrong. The site sits behind a firewall that blocked my development machine, so I checked from a GitHub runner instead. The first run reported no rules about automated access. That was false: the page came back compressed in a format the runner couldn't decode, and a keyword search over binary noise naturally found nothing.
 
-Getting past it would mean running the anti-bot script or replaying its cookie. That's working around a barrier the site put there on purpose, so it's not on the table.
+I fixed the decoding, and the clauses were there in the first pass. Had I believed the first run, I'd have recorded permission that doesn't exist.
 
-The NGX data portal needs a paid account, which is out of scope. A third-party site, african-markets.com, allows the relevant pages in its robots.txt and serves structured listings, but it has no terms page. A missing terms page isn't the same as permission, so that needs a human decision. Any data from there would also have to be labelled as second-hand.
-
-For US data, the SEC's EDGAR requires a contact email in the User-Agent header. A plain request gets a 403, which is their documented behaviour, not a block.
+So for Nigerian companies, a person downloads the results PDF, the way you'd read it anyway, and uploads it. A workflow reads the main figures, notes the page each came from, and checks its own work two ways: profit before tax must match on the income and cash flow statements, and the balance sheet must balance. Everything is marked "not yet checked" until a person compares it with the PDF, and the PDF is deleted so nothing is republished. Prices are typed in by hand and turn amber after four days.
 
 ## What I learned
 
-- **Build the ruler first.** Without an eval, "it looks right" is the only evidence, and it's weak.
-- **Make wrong configurations impossible**, not just unlikely. Strict schemas and full-request hashes remove whole classes of silent errors.
-- **Retry policy is a cost decision.** On a limited GPU budget, retrying the wrong thing is expensive.
-- **Log everything, including cache hits.** Honest cost numbers depend on it.
-- **Data access can be the whole project.** Checking terms before writing a scraper saved me from building on something I couldn't use.
+- **Make every number carry its evidence.** A source and a date turn "trust me" into "check me".
+- **Saying "missing, because…" beats a guess.** A blank with a reason is honest.
+- **Fixed text can be tested; generated text can't.** For explanations, that matters more than variety.
+- **Read the terms properly before building.** And check that you actually read them.
+- **Free APIs hide traps.** The worst bugs give believable wrong answers, not errors.
+- **Change direction when the goal changes.** The agent was interesting; this is useful.
 
 ## What's next
 
-1. Settle an NGX data source (or narrow the NGX scope), and add US prices plus SEC EDGAR.
-2. Build the eval set: dev, test and a hand-checked hard split, frozen at an as-of date, with numeric, exact and source graders.
-3. Build the Kaggle runner: vLLM on a T4 with a small quantised model (Qwen2.5-7B-Instruct-AWQ is the current candidate).
-4. Run the baselines, closed book and retrieval, and publish the numbers.
-5. Build the agent with tools, and measure whether a self-check pass is worth its cost.
-
-Until those runs exist, the honest answer to "how accurate is it?" is: **not measured yet.**
+1. Enter the first Nigerian companies from their results PDFs.
+2. Decide on a licensed Nigerian price feed, or hear back from NGX about personal-use access.
+3. Try the PDF reader on more reports; so far it's been tested on one real one.
+4. Finish the setup in `DEPLOY.md` and use it every day.

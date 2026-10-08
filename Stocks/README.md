@@ -1,27 +1,31 @@
-# Stocks
+# Stocks (Stock Research)
 
 Repo: https://github.com/MelvTheGoat/Stocks
 
 ## In short
 
-An agent that will answer factual questions about US stocks and Nigerian (NGX) stocks, built evaluation-first: the test that measures it comes before the agent. **Early stage:** the run config, the model client (cache, retries, logging), the tests and CI are built. The eval set, the agent and the data pipeline are not built yet.
+A private website for understanding one company at a time, American or Nigerian. It shows the numbers, explains each one as you look at it, and runs eight warning checks, but it never says buy or sell. US accounts come from the SEC, US prices from Twelve Data's free plan, and Nigerian figures from the companies' own results PDFs (prices typed in by hand, because the Nigerian Exchange forbids automated collection). It rebuilds itself every weekday night on GitHub Actions and is published on Cloudflare Pages behind a login.
+
+The repo began (18 Sep 2026) as an "eval-first" AI agent for stock questions. On 6 Oct 2026 the agent, eval harness and Kaggle runner were dropped and it became this research tool. These reports describe the current version.
 
 ## Key facts
 
 | | |
 |---|---|
-| Language | Python 3.10+ |
-| Core tech | Pydantic, httpx, PyYAML. Planned: vLLM, Qwen2.5-7B-Instruct-AWQ, Kaggle T4 |
-| Tests | 64 passing. CI also runs them with the network off. |
-| Results | None yet: not measured in the repo |
-| Main blocker | NGX data: the official site blocks automated access |
+| Language | Python 3.11+ |
+| Core tech | httpx, DuckDB + Parquet, Jinja2 (plain HTML site), pypdf, PyYAML |
+| Data | SEC company facts (US accounts), Twelve Data free plan (US prices), company PDFs + hand-typed prices (Nigeria) |
+| On each company page | 29 figures, each with a source and date (or a reason it's missing), 8 warning checks, 5-year P/E history, peer comparison, latest-report changes |
+| Tests | 436 pass, 1 skipped (my run). CI also runs them with the network off. |
+| Cost | Free: SEC, Twelve Data free plan, GitHub Actions, Cloudflare Pages + Access, ntfy |
+| Not yet | Any Nigerian company entered. Whether the site is live isn't shown in the repo. |
 
 ## Files
 
 | File | What's in it |
 |---|---|
 | [00-start-here.md](00-start-here.md) | **Start here.** The whole project in simple English (good for NotebookLM) |
-| [01-system-design.md](01-system-design.md) | Built vs planned parts, diagram, stack, data flow, trade-offs, 10x |
+| [01-system-design.md](01-system-design.md) | Parts, diagram, stack, data flow, trade-offs, 10x |
 | [02-how-to-write-the-system-design.md](02-how-to-write-the-system-design.md) | Whiteboard steps |
 | [03-linkedin-post.md](03-linkedin-post.md) | LinkedIn post |
 | [04-blog-post.md](04-blog-post.md) | Blog post |

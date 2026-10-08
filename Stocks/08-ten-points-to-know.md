@@ -2,32 +2,32 @@
 
 Repo: https://github.com/MelvTheGoat/Stocks
 
-1. **Goal: answer factual questions on US and NGX stocks, and measure how often the answers are right.**
-   *Why it matters:* the eval is the product, and the agent is what gets measured.
+1. **A private research site for understanding one company at a time, US or Nigerian. It explains every number and never says buy or sell.**
+   *Why it matters:* it's a learning tool, not a tip sheet.
 
-2. **Status: early. Built = config, model client, tests, CI. Not built = eval, agent, data, GPU runner.**
-   *Why it matters:* never claim results that don't exist.
+2. **Every figure carries its source and date, or a sentence saying why it's missing. Nothing is guessed (no P/E for a loss).**
+   *Why it matters:* every number can be checked.
 
-3. **US vs Nigerian stocks is deliberate: it tests memory vs reasoning.**
-   *Why it matters:* it's the project's most interesting question.
+3. **US accounts come from the SEC's company facts: latest filing wins per period, labels chosen per period, TTM = FY + YTD − prior YTD.**
+   *Why it matters:* it handles restatements, label changes and missing periods.
 
-4. **One YAML file per run, with Pydantic `extra="forbid"` and a 12-character config fingerprint.**
-   *Why it matters:* typos fail loudly, and every result can be traced to its exact config.
+4. **US prices come from Twelve Data's free plan: incremental, 700 of 800 requests a day, with guards against an inverted split field.**
+   *Why it matters:* free APIs give wrong numbers silently if misread.
 
-5. **The client stack order is log → cache → retry → HTTP.**
-   *Why it matters:* one cache entry per success, and cache hits are still counted honestly.
+5. **29 figures and 8 warning checks, each with its rule written out.**
+   *Why it matters:* it separates cheap-and-overlooked from cheap-and-failing.
 
-6. **The cache key is a SHA-256 of the entire request (`dataclasses.asdict`). Files are written atomically.**
-   *Why it matters:* new settings can't silently reuse stale answers, and Kaggle kills can't corrupt the cache.
+6. **Context: five years of P/E at quarter ends, and peers by industry code (US peers found automatically from SEC data).**
+   *Why it matters:* a number only means something against something.
 
-7. **Transient (timeout, 429, 5xx) vs permanent (other 4xx, bad body) errors. Backoff with jitter, max 4 retries, 30 s cap.**
-   *Why it matters:* it protects a GPU budget of about 30 hours a week.
+7. **Explanations are hand-written and tested: every figure covered, short sentences, no advice words.**
+   *Why it matters:* fixed text can be checked; generated text can't.
 
-8. **64 tests. CI runs them twice, the second time with sockets disabled. `NeverCalledClient` proves the model wasn't touched.**
-   *Why it matters:* tests can't secretly depend on the network or a GPU.
+8. **Nigeria: NGX forbids automated collection, so results PDFs are uploaded, read, checked two ways and marked unchecked; prices are typed in.**
+   *Why it matters:* it respects terms, and keeps a person in the loop.
 
-9. **Planned model: Qwen2.5-7B-Instruct-AWQ on vLLM, on a free Kaggle T4 (16 GB), temperature 0.**
-   *Why it matters:* it explains the cost, memory and reproducibility choices.
+9. **A nightly GitHub Actions build makes a static site on Cloudflare Pages behind a login, with ntfy phone alerts. All free.**
+   *Why it matters:* no server, no cost, and private because of the price licence.
 
-10. **Data is the blocker: the NGX site sits behind a Sucuri bot filter, and the project refuses to bypass it.**
-    *Why it matters:* it shows judgement on data ethics and terms of use.
+10. **436 tests pass, using real SEC filings. It started as an AI agent and was turned into this on 6 Oct 2026.**
+    *Why it matters:* the numbers are verifiable, and the change of direction was deliberate.
