@@ -357,6 +357,10 @@ On the generated month of 439 payments, worth about ₦37 million:
 - **Without the optional AI extra installed, 8 tests fail**, though the project's notes say they shouldn't.
 - **It hadn't been deployed yet**, according to the README.
 
+And one thing that's being built right now. On a separate branch, `feat/own-books`, there's a version that runs on a real business's books. You upload your invoices and bank statement as CSV files, pull older payments from Paystack, and keep everything in Postgres. Staff get their own logins, and an admin lets them in.
+
+There's one sensible rule there: on real books, the model only suggests and never closes anything by itself. It learned on made-up data, so its confidence hasn't been checked on real customers yet. For now, the main branch still runs on the practice data.
+
 ## Let's put it all together
 
 So let's look at it in one breath.

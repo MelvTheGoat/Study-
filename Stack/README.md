@@ -16,6 +16,7 @@ Reckon matches incoming payments (card, dedicated account, bank transfer, cash) 
 | Threshold | 0.85, from a ₦60 vs ₦5,000 cost ratio |
 | Tests | 494 pass with the optional LLM extra. 8 fail without it. |
 | Deployed | Not yet |
+| In progress (Oct 2026) | Using a business's own books, on the `feat/own-books` branch. Main still runs on practice data. |
 
 ## Files
 

@@ -129,3 +129,5 @@ For 10x payments or many businesses:
 - **Monitored, human-approved retraining** from review-queue labels, with drift alerts.
 - **Age escalation** in the queue alongside money at risk.
 - **Real data** to re-fit the model and re-draw the threshold with hundreds of residual cases.
+
+**In progress (Oct 2026, `feat/own-books` branch, not on main):** CSV import of invoices and bank-statement payments, a Paystack history pull, books kept in Postgres, staff logins with an admin (People and Activity pages), and every decision signed with the reviewer's email. On real books the model suggests but never auto-closes, since its confidence was never checked against real customers. Main was put back on the practice data on 6 Oct so the demo stays stable.

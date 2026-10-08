@@ -99,6 +99,10 @@ But this data is made up. On real data, there **will** be some wrong closes. The
 - Without the optional AI extra installed, 8 tests fail. The project's notes say they shouldn't.
 - It hadn't been deployed online yet, according to the project's notes.
 
+**What's being worked on now (October 2026).** A version that runs on a business's *own* books is being built on a separate branch, `feat/own-books`. You bring in your invoices and bank statement as CSV files, and pull past payments from Paystack. The books are kept in a Postgres database, and the pages sit behind logins, with an admin who lets staff in.
+
+On your own books, the model only *suggests*. It doesn't close anything by itself, because it learned on made-up data. This work was briefly on the main branch, then moved back off it on 6 October, so the main version still shows the practice data while it's tested.
+
 ## 9. What This Project Shows You Can Do
 
 - Solve a real, everyday business problem with careful design.
