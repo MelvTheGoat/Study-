@@ -6,7 +6,7 @@ Repo: https://github.com/MelvTheGoat/web3-risk-mcp
 
 ## Summary
 
-A read-only MCP server (Python 3.11+, `mcp` SDK 2.x, async httpx) exposing 6 tools, 1 resource and 1 prompt for EVM address risk: wallet profiling, token risk, contract inspection (including bytecode selector scans and EIP-1967 proxy detection) and 1–2 hop fund tracing. Analysis emits findings. A pure, table-driven scorer (85 rules) turns them into a 0–100 score with per-point reasons, group de-duplication, a decisive floor of 75 and a source-based confidence. **102 tests pass (~5 s), with all HTTP mocked.** An evaluation harness with 34 labelled addresses exists, but **live results aren't in the repo yet.** ~4,100 lines. Built on 25 Sep 2026.
+A read-only MCP server (Python 3.11+, `mcp` SDK 2.x, async httpx) exposing 6 tools, 1 resource and 1 prompt for EVM address risk: wallet profiling, token risk, contract inspection (including bytecode selector scans and EIP-1967 proxy detection) and 1–2 hop fund tracing. Analysis emits findings. A pure, table-driven scorer (85 rules) turns them into a 0–100 score with per-point reasons, group de-duplication, a decisive floor of 75 and a source-based confidence. **170 tests pass (~10 s), with all HTTP mocked.** First live evaluation (30 Sep 2026) on 34 labelled addresses: ROC AUC 0.981, 1 false alarm, 1 miss. Built on 25 Sep 2026; Arc support, the Arc Safe Send web app and the RiskAttestation contract added 3–8 Oct 2026.
 
 ## Architecture
 
@@ -14,7 +14,10 @@ A read-only MCP server (Python 3.11+, `mcp` SDK 2.x, async httpx) exposing 6 too
 server.py            MCP registration: tools, resource, prompt
 __main__.py          --transport stdio|http, --port
 config.py            pydantic-settings (.env)
-chains.py            5 chains, address validation
+chains.py            6 chains (incl. Arc, 5042), address validation
+web/                 Arc Safe Send: FastAPI app, limits, payment advice, static page
+attestation.py       RiskAttestation call data and findings hash
+contracts/           RiskAttestation.sol (Arc Foundry), checked deploy script
 services.py          builds clients
 clients/http.py      cache, per-source rate limit, retries (backoff+jitter), key redaction
 clients/etherscan.py V2 multi-chain API
@@ -63,10 +66,11 @@ evaluation.py        metrics + record/replay cassette
 
 ## How it's tested and evaluated
 
-- **102 tests pass** (I ran them): chains, clients, config, contract, evaluation metrics, HTTP layer, `score_risk`, scoring rules, server registration, token, trace, wallet. HTTP is mocked with respx, so no keys or network are needed.
+- **170 tests pass** (I ran them): chains, clients, config, contract, evaluation metrics, HTTP layer, `score_risk`, scoring rules, server registration, token, trace, wallet, Arc (replaying 70 recorded Arc mainnet responses), attestation, web API, CLI. Plus 8 Foundry tests on the contract. HTTP is mocked with respx, so no keys or network are needed.
 - **CI:** ruff lint + format check, pytest on 3.11/3.12/3.13, Docker build.
 - **Eval harness:** 34 items (12 risky, 22 safe) with label sources. Metrics: ROC AUC, and precision, recall, accuracy, TP/FP/TN/FN at threshold 50. Two passes (with and without the local list).
-- **Eval results: not measured in the repo yet** ("pending the first live run"). No cassette or `eval/results.md` committed.
+- **Eval results (30 Sep 2026, `eval/results.md`):** ROC AUC 0.981, precision 0.917, recall 0.917: 1 false alarm in 22 safe addresses (USDT, 68) and 1 miss in 12 risky (the SQUID rug pull, 30). Without the local bad list: AUC 0.958, 3 of 12 missed. Mean score risky/safe 82.2/9.5. Recorded responses are committed in `eval/fixtures/` for offline replay.
+- **Rule table v3 (92 rules):** owner powers (mint, blacklist, pause, upgrade, withdraw, limits, single owner) capped at 30 together; `token.owner_can_change_balance` no longer decisive; Arc blocklist findings added as decisive (12 decisive in total); `address.official_contract` −30.
 
 ## Known weaknesses
 

@@ -100,13 +100,21 @@ Following money can blow up fast: one wallet can touch thousands. So tracing is 
 It's easy to build a risk scorer that looks great on its own examples. So I built an evaluation set of 34 hand-checked addresses, each with a source for its label:
 
 - **12 risky:** a known honeypot, the SQUID rug pull, 4 phishing wallets, 4 exploiter wallets (Ronin, Bybit, Euler, Wormhole) and 2 Tornado Cash pools.
-- **22 safe:** major tokens on all five chains, Uniswap and Aave contracts, a well-known personal wallet and an exchange hot wallet.
+- **22 safe:** major tokens on the first five chains, Uniswap and Aave contracts, a well-known personal wallet and an exchange hot wallet.
 
 The script reports ROC AUC, precision, recall, false alarms and misses at a threshold of 50. And it runs **twice**: the second time with the local list of known bad addresses switched off. Six risky items are on that list, so without the second run the list could make the scorer look smarter than it is.
 
 It also records every API response into a "cassette" file (with keys stripped), so anyone can replay the evaluation offline and get the same numbers.
 
-**The results aren't in yet.** The README says "pending the first live run", and I'm not going to guess them.
+**The results (first live run, 30 September 2026):** a ROC AUC of 0.981. At a score of 50, it caught 11 of the 12 risky addresses and flagged 1 of the 22 safe ones. With the local list switched off, the AUC was 0.958 and it missed 3.
+
+The two mistakes are worth knowing. USDT scored 68, because its owner really can change balances. And the SQUID rug pull scored only 30, because the data services no longer flag it. That first run also led to some tuning: owner powers are now capped at 30 points together, because regulated stablecoins have all of them and aren't scams.
+
+### Arc Safe Send
+
+In October I added Arc, Circle's blockchain, where USDC is the native coin. On Arc, every check also reads Circle's USDC and EURC blocklists, and simulates a 1 USDC payment to see if it would go through. Nothing is sent. USDC moves are read from one system log, so a payment is never counted twice.
+
+That became a live web page, https://arc-safe-send.onrender.com. You check an address, then pay from your own wallet. The server never sees a key. You can also save the check on Arc in a tiny contract, RiskAttestation, which is now deployed on Arc mainnet.
 
 ## What I learned
 
@@ -118,6 +126,6 @@ It also records every API response into a "cassette" file (with keys stripped), 
 
 ## What's next
 
-- Run the live evaluation and publish ROC AUC, precision and recall, with and without the local list.
+- Add hand-checked Arc addresses to the evaluation set.
 - Grow the labelled set, then consider fitting the weights while keeping each point explainable.
 - Add chains, and a paid data plan or my own indexer for full history on Base and BNB Chain.

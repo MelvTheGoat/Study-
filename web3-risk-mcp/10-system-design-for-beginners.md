@@ -35,7 +35,7 @@ This project gives AI assistants a safe way to answer "Is this crypto token or w
 ### What It Needs to Do (Step 1)
 
 - Offer **6** tools to any MCP-compatible assistant.
-- Support **5** blockchains, including Ethereum and Base.
+- Support **6** blockchains, including Ethereum, Base and Arc.
 - Score from **0 to 100**, using **85** written rules.
 - **Only read** data. It must never be able to send money.
 
@@ -94,8 +94,8 @@ Scanning a contract's raw code for known function fingerprints works when its co
 
 ### How We Know It's Working (Step 5)
 
-- **Tests**: 102 automatic checks pass in about 5 seconds, with every outside service faked, so no keys are needed.
-- **Precision and recall**: of the addresses flagged risky, how many really were, and of the risky ones, how many were caught. The project has 34 hand-labelled addresses (12 risky, 22 safe) ready for this. **Not measured yet**, because the first live run hasn't happened.
+- **Tests**: 170 automatic checks pass in about 10 seconds, with every outside service faked, so no keys are needed.
+- **Precision and recall**: of the addresses flagged risky, how many really were, and of the risky ones, how many were caught. On 34 hand-labelled addresses, it caught **11 of 12** risky ones, with **1 false alarm** in 22 safe ones.
 - **Confidence**: how many data sources answered. If none failed, confidence is high. If more than half failed, it's low.
 
 ### What Can Go Wrong (Step 6)

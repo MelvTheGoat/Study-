@@ -42,7 +42,7 @@ flowchart LR
 | MCP server | `server.py` | Registers 6 tools (`score_risk`, `get_wallet_profile`, `check_token_risk`, `inspect_contract`, `trace_funds`, `list_supported_chains`), the `risk://scoring-method` resource and the `investigate_address` prompt. Every tool is marked `readOnlyHint`. | Write tools once, and every MCP client can use them. |
 | CLI | `__main__.py` | Runs over stdio (local clients) or streamable HTTP at `/mcp`. | Local apps use stdio. Remote or Docker use HTTP. |
 | Config | `config.py` | Settings from `.env` via pydantic-settings. | Keys stay out of code. |
-| Chains | `chains.py` | Ethereum, Base, Arbitrum One, Polygon PoS, BNB Chain, plus address checks. | One place for chain IDs and validation. |
+| Chains | `chains.py` | Ethereum, Base, Arbitrum One, Polygon PoS, BNB Chain and Arc (chain 5042, added Oct 2026), plus address checks. | One place for chain IDs and validation. |
 | HTTP layer | `clients/http.py` | Cache (5 minutes by default), a rate limit per source under free-plan limits, retries on timeout/429/5xx with exponential backoff and jitter, and API keys stripped from logs, cache keys and errors. | Free APIs are slow and limited. Keys must never leak. |
 | Etherscan client | `clients/etherscan.py` | V2 API: history, source code. One key covers all chains. | Wallet history and verified source. |
 | GoPlus client | `clients/goplus.py` | Token and address security flags. | Broad scam coverage (honeypot, taxes, labels). |
@@ -57,6 +57,9 @@ flowchart LR
 | Scorer | `scoring.py` | 85 rules (11 decisive, 4 trust signals with negative points). Same-problem findings share a group and only the biggest counts. Clamped to 0–100. Decisive findings set a floor of 75. Confidence comes from how many sources answered. | Fully explainable. Anyone can recompute it by hand. |
 | Method doc | `method.py`, `scripts/render_method_doc.py`, `docs/risk-method.md` | Generates the rule table doc from code. A test fails if it drifts. | Docs can't go stale. |
 | Prompt | `prompts.py` | A step-by-step plan: which tools to call and how to explain results to a beginner. | Guides the assistant to a consistent investigation. |
+| Arc extras | `analysis/arc.py`, `clients/rpc.py` | Reads `isBlacklisted` on Arc's USDC and EURC contracts (80 points, decisive), simulates a 1 USDC payment with a read-only `eth_call` (`send_check`, doesn't change the score), reads USDC flows only from the EIP-7708 system Transfer stream so nothing is counted twice, and gives 13 official Circle/Arc contracts a −30 trust signal. | Arc's USDC is both the native coin (18 decimals) and an ERC-20 (6 decimals), and a payment to a blocked address fails but still costs the fee. |
+| Arc Safe Send | `web/` (FastAPI + plain JS), `Dockerfile.web`, `render.yaml` | One `POST /api/check` call behind a page. Cache (10 min), per-visitor limits (6/min, 40/hour), a daily cap of 1,500. The user's own browser wallet pays or saves a check. Live on Render's free plan. | A checked payment for people, with the same read-only server. |
+| RiskAttestation | `contracts/` (Solidity, Arc Foundry), `attestation.py` | A tiny contract with no owner and no funds that records address, score, rule version, findings hash, time and saver. Deployed on Arc mainnet. | A public, checkable record of a check. |
 | Evaluation | `evaluation.py`, `eval/` | 34 hand-labelled addresses (12 risky, 22 safe). ROC AUC, precision, recall, false alarms and misses at threshold 50. Runs twice: with and without the local bad list. Record/replay "cassette". | An honest measure, including what works without the local list. |
 
 ## Tech stack
@@ -70,7 +73,8 @@ flowchart LR
 | pycryptodome | Keccak hashing | Function selectors and storage slots |
 | Etherscan V2, GoPlus, DexScreener, public RPC | Data | Free tiers |
 | uv | Packaging and lock file | Fast, reproducible installs |
-| pytest, pytest-asyncio, respx | Tests | All HTTP mocked, no keys needed. 102 tests pass. |
+| pytest, pytest-asyncio, respx | Tests | All HTTP mocked, no keys needed. 170 tests pass (my run). |
+| FastAPI, Solidity (Arc Foundry), Render | Arc Safe Send and RiskAttestation | Small web API, an on-chain record, free hosting |
 | ruff | Lint and format | Fast |
 | Docker | Deployment | Non-root image, HTTP or stdio |
 | GitHub Actions | CI | Lint, format, tests on 3.11/3.12/3.13, Docker build |
@@ -88,13 +92,15 @@ flowchart LR
 ## Trade-offs and limits
 
 - **Rule weights are hand-picked**, not learned. They follow known scam patterns.
-- **Evaluation not run live yet.** The README says results are "pending the first live run". ROC AUC, precision and recall are **not measured in the repo yet**, and the cassette file isn't committed.
-- **Small eval set** (34 items). Even when run, the numbers will have wide uncertainty.
+- **Evaluation (30 Sep 2026, `eval/results.md`, replayable from `eval/fixtures/`):** ROC AUC 0.981, precision 0.917, recall 0.917: 1 false alarm in 22 safe addresses (USDT, 68) and 1 miss in 12 risky (the SQUID rug pull, 30). Without the local bad list: AUC 0.958, 3 of 12 missed. The rules were tuned after this first run (owner-power cap of 30, plain contracts no longer scored as tokens, EIP-7702 delegated wallets treated as wallets).
+- **Small eval set** (34 items), with wide uncertainty, and no Arc addresses yet.
 - **Sampled history:** latest 100 transactions (50 at hop 2), busiest paths only. Old or low-volume links can be missed.
 - **Bytecode scanning is a heuristic.** Renamed or custom functions slip through.
 - **A low score means "no red flags found", not "safe".** A brand-new scam unknown to GoPlus can score low.
 - **Etherscan's free plan** lacks account history on Base and BNB Chain.
 - **EVM only.**
+- **Arc is young** (first blocks May 2026): no wallet qualifies as "established" yet, and some Circle contracts lack verified source on Etherscan, so CCTP TokenMessengerV2 scores 38.
+- **PyPI:** the package and release workflow are ready, and the README says it's on PyPI, but on 8 Oct 2026 PyPI still returned "not found" for it.
 - **Missing data lowers confidence, not the score.** That's honest, but a user might still read a low score as safe.
 
 ## What I'd change at 10x scale

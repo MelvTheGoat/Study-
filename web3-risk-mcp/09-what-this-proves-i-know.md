@@ -38,7 +38,7 @@ Repo: https://github.com/MelvTheGoat/web3-risk-mcp
 
 **Simple explanation:** add up points from clear rules so each part of the score can be explained.
 
-**In this project:** 85 rules, groups, decisive floor, trust signals, confidence, levels.
+**In this project:** 92 rules, a cap on owner powers, groups, decisive floor, trust signals, confidence, levels.
 
 **Also be ready to explain:** scorecards in credit risk, rules vs ML trade-offs, calibration, how to fit rule weights (logistic regression) while keeping explainability, and thresholds and alert fatigue.
 

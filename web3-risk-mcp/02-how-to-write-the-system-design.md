@@ -28,7 +28,7 @@ One line:
 
 | Thing | Number |
 |---|---|
-| Chains | 5 EVM chains |
+| Chains | 6 EVM chains (including Arc) |
 | Tools | 6, plus 1 resource and 1 prompt |
 | Rules | 85 (11 decisive, 4 trust) |
 | Decisive floor | 75 |
@@ -97,6 +97,7 @@ One line:
 - 34 labelled addresses. Metrics: ROC AUC, and precision/recall at 50.
 - Run twice: with and without the local bad list (to avoid "the list did all the work").
 - A cassette records responses so anyone can replay offline.
+- First live run (30 Sep 2026): ROC AUC 0.981, 1 false alarm, 1 miss. Without the list: 0.958, 3 misses.
 
 ---
 

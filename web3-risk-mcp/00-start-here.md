@@ -24,7 +24,7 @@ A **token** is a digital coin made by a smart contract. Anyone can create one in
 
 ## 4. How It Works, Step by Step
 
-**Step 1: The assistant asks.** An AI assistant calls the `score_risk` tool with an address and a blockchain name. It works with 5 blockchains, including Ethereum and Base.
+**Step 1: The assistant asks.** An AI assistant calls the `score_risk` tool with an address and a blockchain name. It works with 6 blockchains, including Ethereum, Base and Arc (Circle's blockchain, where the main coin is the USDC dollar coin).
 
 **Step 2: Check the address is valid.** The tool checks the address is written in the right format.
 
@@ -91,18 +91,23 @@ A **token** is a digital coin made by a smart contract. Anyone can create one in
 
 ## 9. How Good Is It?
 
-102 automatic tests pass in about 5 seconds, with every outside service faked, so no keys are needed.
+170 automatic tests pass in about 10 seconds, with every outside service faked, so no keys are needed.
 
-There's a test set of 34 hand-labelled addresses: 12 risky and 22 safe. But the first live run hasn't happened yet. So how accurate the scores are **hasn't been measured yet**.
+There's a test set of 34 hand-labelled addresses: 12 risky and 22 safe. It was run for real on 30 September 2026. With a score of 50 as the line, it caught 11 of the 12 risky addresses and wrongly flagged 1 of the 22 safe ones. The miss was an old rug-pull token (score 30), and the false alarm was USDT (score 68), because its owner really can change balances.
+
+With the project's own list of known bad addresses switched off, it still caught 9 of the 12. After that first run, the rules were tuned: owner powers like "can mint" or "can freeze" now add at most 30 points together, because regulated coins like USDC have those powers and aren't scams.
+
+**Arc Safe Send (October 2026).** There's now a live web page, https://arc-safe-send.onrender.com, that checks an address on Arc before you send USDC. It also checks Circle's own blocklists and tests whether the payment would go through, without sending anything. You can then pay from your own wallet, and save the check on the blockchain in a small contract called RiskAttestation.
 
 ## 10. What's Weak or Missing
 
 - The points for each rule were set by hand, based on known scam patterns, not learned from data.
-- 34 test addresses is a small set, so even when measured, the numbers will be rough.
+- 34 test addresses is a small set, so the numbers are rough. None of them are on Arc yet.
 - It only looks at recent history (the latest 100 transactions), and only the busiest paths.
 - A brand-new scam that data services haven't seen yet can score low. A low score means "no red flags found", not "safe".
 - Etherscan's free plan doesn't give account history on two of the blockchains.
 - It only works with Ethereum-style blockchains.
+- Arc is new (its first blocks are from May 2026), so no Arc wallet has a long history yet.
 
 ## 11. What This Project Shows You Can Do
 
@@ -118,12 +123,12 @@ There's a test set of 34 hand-labelled addresses: 12 risky and 22 safe. But the 
 2. It's an MCP server, so any compatible assistant can use it.
 3. It returns a score from 0 to 100, with a reason for every point.
 4. Checks describe facts, and a separate scorer adds up points.
-5. There are 85 written rules.
+5. There are 92 written rules.
 6. Nothing is counted twice.
 7. Deal-breakers like honeypots push the score to at least 75.
 8. Missing data lowers confidence, never the score.
 9. It can only read data, never move money.
-10. Its accuracy hasn't been measured yet.
+10. On 34 hand-labelled addresses, it caught 11 of 12 risky ones, with 1 false alarm in 22 safe ones.
 
 ## Where to Go Next
 

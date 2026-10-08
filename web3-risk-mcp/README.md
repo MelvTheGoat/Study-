@@ -4,7 +4,7 @@ Repo: https://github.com/MelvTheGoat/web3-risk-mcp
 
 ## In short
 
-A read-only MCP server that lets any AI assistant check a crypto wallet, token or smart contract for scam risk across 5 EVM chains, and returns a 0–100 score with a reason for every point. Analysis produces findings. A separate, public rule table turns them into a score.
+A read-only MCP server that lets any AI assistant check a crypto wallet, token or smart contract for scam risk across 6 EVM chains (including Arc, Circle's chain), and returns a 0–100 score with a reason for every point. Analysis produces findings. A separate, public rule table turns them into a score.
 
 ## Key facts
 
@@ -12,9 +12,10 @@ A read-only MCP server that lets any AI assistant check a crypto wallet, token o
 |---|---|
 | Language | Python 3.11+ |
 | Core tech | MCP SDK, httpx (async), pydantic, Etherscan V2, GoPlus, DexScreener, RPC |
-| Scoring | 85 rules, decisive floor 75, confidence from source success |
-| Tests | 102 passing |
-| Evaluation | 34 labelled addresses. Live results not measured yet. |
+| Scoring | 92 rules (rule table version 3), owner powers capped at 30, decisive floor 75, confidence from source success |
+| Tests | 170 Python tests passing (my run), plus 8 Solidity tests |
+| Evaluation (30 Sep 2026) | 34 labelled addresses: ROC AUC 0.981, precision 0.917, recall 0.917: 1 false alarm in 22 safe addresses (USDT, 68) and 1 miss in 12 risky (the SQUID rug pull, 30). Without the local bad list: AUC 0.958, 3 of 12 missed. |
+| Live | Arc Safe Send web app: https://arc-safe-send.onrender.com. RiskAttestation contract on Arc mainnet. |
 
 ## Files
 

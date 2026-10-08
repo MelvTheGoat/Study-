@@ -16,7 +16,7 @@ The terms are grouped from the ground up: crypto basics, the scams being checked
 ### EVM (Ethereum Virtual Machine)
 **What it means:** the system that runs programs on Ethereum. Many other blockchains copy it.
 
-**Why it's needed here:** the tool supports 5 EVM blockchains: Ethereum, Base, Arbitrum One, Polygon PoS and BNB Chain. Because they work the same way, one set of checks covers them all.
+**Why it's needed here:** the tool supports 6 EVM blockchains: Ethereum, Base, Arbitrum One, Polygon PoS, BNB Chain and Arc. Because they work the same way, one set of checks covers them all.
 
 ### Address
 **What it means:** an ID on the blockchain, like an account number, written as "0x" followed by 40 characters.
@@ -148,7 +148,7 @@ The terms are grouped from the ground up: crypto basics, the scams being checked
 ### API and API key
 **What it means:** an API lets one program ask another for data. A key is a secret code that identifies you.
 
-**Why it's needed here:** the tool gets data from Etherscan, GoPlus and DexScreener. Etherscan uses a free key, and one key covers all 5 blockchains. Keys are kept in a private settings file, not in the code.
+**Why it's needed here:** the tool gets data from Etherscan, GoPlus and DexScreener. Etherscan uses a free key, and one key covers all 6 blockchains. Keys are kept in a private settings file, not in the code.
 
 ### RPC (remote procedure call)
 **What it means:** a direct way to ask a blockchain node (a computer holding the blockchain) a question.
@@ -197,7 +197,7 @@ The terms are grouped from the ground up: crypto basics, the scams being checked
 ### Rule table
 **What it means:** a list saying how many points each finding is worth.
 
-**Why it's needed here:** all 85 rules live in one place, so they're easy to read and adjust. A document is generated from it, and a test fails if the two ever differ.
+**Why it's needed here:** all 92 rules live in one place, so they're easy to read and adjust. A document is generated from it, and a test fails if the two ever differ.
 
 ### Grouping (no double counting)
 **What it means:** findings about the same problem share a group, and only the biggest one counts.
@@ -246,24 +246,24 @@ The terms are grouped from the ground up: crypto basics, the scams being checked
 ### Evaluation set
 **What it means:** examples with known answers, used to test the tool.
 
-**Why it's needed here:** there are 34 hand-labelled addresses (12 risky, 22 safe). The first live run hasn't happened yet, so there are no results.
+**Why it's needed here:** there are 34 hand-labelled addresses (12 risky, 22 safe). The first live run (30 September 2026) caught 11 of 12 risky ones, with 1 false alarm.
 
 ### Precision and recall
 **What it means:** precision is how many flagged addresses were truly risky. Recall is how many risky addresses were caught.
 
-**Why it's needed here:** they're the planned measures, using a score of 50 as the line between "risky" and "safe".
+**Why it's needed here:** they're the main measures, using a score of 50 as the line between "risky" and "safe". Both came out at 0.917.
 
 ### ROC AUC
 **What it means:** a number from 0.5 (guessing) to 1.0 (perfect) for how well scores separate risky from safe, across every possible cut-off line.
 
-**Why it's needed here:** it tests the score as a whole, not just at the 50 line.
+**Why it's needed here:** it tests the score as a whole, not just at the 50 line. It came out at 0.981.
 
 ### Record and replay (cassette)
 **What it means:** saving real service answers once, then replaying them in later runs.
 
-**Why it's needed here:** it makes the evaluation repeatable offline. The file hasn't been added to the project yet.
+**Why it's needed here:** it makes the evaluation repeatable offline. The recorded answers are now saved in the project.
 
 ### Mocking
 **What it means:** replacing a real service with a pretend one in tests.
 
-**Why it's needed here:** all 102 tests use pretend services, so they need no keys or internet.
+**Why it's needed here:** all 170 tests use pretend services, so they need no keys or internet.

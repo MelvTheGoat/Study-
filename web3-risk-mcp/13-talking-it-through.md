@@ -55,14 +55,14 @@ The code lives in `src/web3_risk_mcp/`. Its `__init__.py` describes it in one li
 
 ## Step one: which blockchains, and is this address real?
 
-`src/web3_risk_mcp/chains.py` lists the 5 blockchains we support: Ethereum, Base, Arbitrum One, Polygon PoS and BNB Chain. They're all "EVM" chains, meaning they work the same way, so one set of checks covers them all.
+`src/web3_risk_mcp/chains.py` lists the blockchains we support: Ethereum, Base, Arbitrum One, Polygon PoS and BNB Chain. Later we'll add a sixth, Arc. They're all "EVM" chains, meaning they work the same way, so one set of checks covers them all.
 
 It also checks an address is written correctly, "0x" followed by the right characters, before we waste any calls on it.
 
 Tested in `tests/test_chains.py`. And `tests/test_config.py` checks the settings load properly.
 
 > **📁 Files we just created**
-> - `src/web3_risk_mcp/chains.py`: the 5 supported blockchains, and address checks.
+> - `src/web3_risk_mcp/chains.py`: the supported blockchains, and address checks.
 > - `tests/test_chains.py` and `tests/test_config.py`: tests for chains and settings.
 
 ## Step two: safe connections to free services
@@ -75,7 +75,7 @@ Retries that wait longer each time, with a little random wobble so lots of retri
 
 Then one file per service, each using that shared layer:
 
-- `clients/etherscan.py`: Etherscan, a "block explorer" that indexes everything on a chain. It gives transaction history and a contract's published code. One key covers all 5 chains.
+- `clients/etherscan.py`: Etherscan, a "block explorer" that indexes everything on a chain. It gives transaction history and a contract's published code. One key covers all the chains.
 - `clients/goplus.py`: GoPlus, which runs automatic security checks. It flags honeypots, buy and sell taxes, owner powers and scam labels.
 - `clients/dexscreener.py`: DexScreener, which tracks trading pools on decentralised exchanges, where people swap tokens without a company in the middle. It tells us how much money is in a token's pools.
 - `clients/rpc.py`: a direct line to the blockchain itself, for questions like "what's this balance?" or "what code lives here?"
@@ -169,11 +169,11 @@ Let's pause and look at where we are. We have safe connections, a list of known 
 
 `src/web3_risk_mcp/scoring.py` turns findings into a score. And it's completely transparent. Anyone could redo it by hand.
 
-It works in four steps. Every finding has a fixed ID, like `token.honeypot`. A rule table gives each ID its points, 85 rules in all.
+It works in four steps. Every finding has a fixed ID, like `token.honeypot`. A rule table gives each ID its points, 92 rules in all by now.
 
-Findings about the same problem share a group, and only the biggest one counts, so nothing is counted twice. Then the total is kept between 0 and 100.
+Findings about the same problem share a group, and only the biggest one counts, so nothing is counted twice. Owner powers, like "can mint" or "can freeze", add at most 30 points together, because regulated coins like USDC have all of them and aren't scams. Then the total is kept between 0 and 100.
 
-And then the deal-breakers. 11 findings are "decisive", like a honeypot or a sanctioned address. Here's the real number:
+And then the deal-breakers. 12 findings are "decisive", like a honeypot or a sanctioned address. Here's the real number:
 
 ```python
 DECISIVE_FLOOR = 75
@@ -192,7 +192,7 @@ Code means a contract or token, so it runs the token, contract and address check
 Tests: `tests/test_scoring.py` and `tests/test_score_risk.py`.
 
 > **📁 Files we just created**
-> - `src/web3_risk_mcp/scoring.py`: 85 rules, no double counting, the 75 floor, and confidence.
+> - `src/web3_risk_mcp/scoring.py`: 92 rules, no double counting, the 75 floor, and confidence.
 > - `src/web3_risk_mcp/analysis/score.py`: runs the right checks, then scores them.
 > - `tests/test_scoring.py` and `tests/test_score_risk.py`: scorer tests.
 
@@ -245,6 +245,12 @@ Tested in `tests/test_evaluation.py`.
 > - `eval/run_eval.py`: runs the evaluation, with and without the local list.
 > - `tests/test_evaluation.py`: tests the measuring tools.
 
+When we run it for real, the results go into `eval/results.md` and `eval/results.json`, and the recorded answers into `eval/fixtures/`. The first run, on 30 September, gave a ROC AUC of 0.981. It caught 11 of the 12 risky addresses, and wrongly flagged 1 of the 22 safe ones.
+
+> **📁 Files we just created**
+> - `eval/results.md` and `eval/results.json`: the first real results.
+> - `eval/fixtures/`: the recorded answers, so anyone can replay it offline.
+
 ## Step ten: automatic checks and packaging
 
 `.github/workflows/ci.yml` checks every change automatically. It runs the linter and the format check, runs the tests on three Python versions, and builds the Docker box.
@@ -256,16 +262,42 @@ Tested in `tests/test_evaluation.py`.
 > - `Dockerfile`: packs the server into a box.
 > - `.dockerignore`: what to leave out of the box.
 
+We also get it ready for PyPI, the public shelf of Python packages, so people could install it with one command. A release workflow, `.github/workflows/release.yml`, publishes a new version when it's tagged. On 8 October, PyPI didn't list it yet.
+
+## Step eleven: Arc Safe Send
+
+In October we add a sixth blockchain: Arc, made by Circle, the company behind USDC. On Arc, USDC is the main coin. That brings three new problems.
+
+First, Circle keeps a blocklist. A payment to a blocked address fails, but you still pay the fee. So every Arc check now reads the USDC and EURC blocklists, and a blocked address is a deal-breaker.
+
+Second, we want to know if a payment would go through before anyone sends it. So we simulate a 1 USDC payment with a read-only call. Nothing is sent or signed.
+
+Third, USDC on Arc is logged twice, at two different decimal sizes. So we read money moves only from one system log, and nothing gets counted twice. `tests/test_arc.py` checks all of this by replaying 70 recorded answers from the real Arc network.
+
+Then we build a web page for people, not just assistants: Arc Safe Send. `src/web3_risk_mcp/web/` holds the small FastAPI app and its page. It caches answers, and limits how many checks each visitor can run, so the free API keys don't run out. `Dockerfile.web` and `render.yaml` put it online for free on Render, at https://arc-safe-send.onrender.com.
+
+After a check, you can pay from your own browser wallet. The server never sees a key. And `contracts/` holds RiskAttestation, a tiny contract that saves a check on Arc for anyone to see: the address, the score, the rule version and a fingerprint of the findings. It's now deployed on Arc mainnet.
+
+> **📁 Files we just created**
+> - `src/web3_risk_mcp/analysis/arc.py`: the Arc checks: blocklists, the payment test and the one USDC log.
+> - `tests/test_arc.py`: Arc checks, replaying real Arc answers.
+> - `src/web3_risk_mcp/web/`: the Arc Safe Send app and page.
+> - `Dockerfile.web` and `render.yaml`: put the web app online.
+> - `src/web3_risk_mcp/attestation.py`: builds the "save this check" call.
+> - `contracts/`: the RiskAttestation contract, its tests and a deploy script.
+> - `tests/test_web.py` and `tests/test_attestation.py`: tests for the web app and saved checks.
+> - `.github/workflows/release.yml`: publishes new versions to PyPI.
+
 ## So, how's it doing?
 
-102 tests pass in about 5 seconds, with every outside service faked.
+170 tests pass in about 10 seconds, with every outside service faked. The contract has 8 more tests of its own.
 
-But the first live evaluation hasn't been run yet. So precision, recall and ROC AUC **haven't been measured**, and the cassette file isn't in the project yet.
+On the 34 test addresses, the ROC AUC was 0.981. It caught 11 of 12 risky ones and gave 1 false alarm in 22 safe ones. With our own bad-address list switched off, it still caught 9 of 12.
 
 ## What's still missing?
 
 - **The points per rule were set by hand**, based on known scam patterns.
-- **34 test addresses is small**, so even when measured, the numbers will be rough.
+- **34 test addresses is small**, so the numbers are rough, and none of them are on Arc yet.
 - **It only looks at recent history**: the latest 100 transactions, and the busiest paths.
 - **A brand-new scam** that services haven't seen can score low. Low means "no red flags found", not "safe".
 - **Etherscan's free plan** has no account history on Base or BNB Chain.
@@ -274,11 +306,11 @@ But the first live evaluation hasn't been run yet. So precision, recall and ROC 
 
 So let's look at it in one breath.
 
-We **set up the workshop** with pinned versions and private keys. We listed **5 blockchains** and checked addresses. We built **one safe layer** for every data service, with a cache, limits, retries and key hiding, and **one connection per service**, with a read-only allow-list for the blockchain.
+We **set up the workshop** with pinned versions and private keys. We listed **the blockchains** and checked addresses. We built **one safe layer** for every data service, with a cache, limits, retries and key hiding, and **one connection per service**, with a read-only allow-list for the blockchain.
 
-We added a **list of known bad actors**, decided **one shape for findings**, and wrote **six checks** that only describe what they see. Then a **transparent scorer**: 85 rules, no double counting, a floor of 75 for deal-breakers, and confidence that drops when data is missing.
+We added a **list of known bad actors**, decided **one shape for findings**, and wrote **six checks** that only describe what they see. Then a **transparent scorer**: 92 rules, no double counting, a floor of 75 for deal-breakers, and confidence that drops when data is missing.
 
-We made the **method document build itself** from the code, wrapped it all in an **MCP server**, built an **honest evaluation** with replayable answers, and added **automatic checks**.
+We made the **method document build itself** from the code, wrapped it all in an **MCP server**, built an **honest evaluation** with replayable answers, and added **automatic checks**. Then we added **Arc**, with blocklist checks, a payment test, a live web page and a contract that saves checks on the blockchain.
 
 Notice how it links. Keeping checks and scoring apart is what makes every point explainable. The read-only rule shows up twice, in the tools and in the blockchain connection. And recording which sources answered, back in step four, is what powers the confidence level in step six.
 

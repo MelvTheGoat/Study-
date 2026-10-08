@@ -6,9 +6,9 @@ Repo: https://github.com/MelvTheGoat/web3-risk-mcp
 
 ## 60-second pitch
 
-> "People ask AI assistants 'is this token safe?', and without data the assistant guesses. I built web3-risk-mcp, an MCP server that gives any MCP-compatible assistant real tools to check a wallet, token or smart contract across five EVM chains. It pulls from Etherscan, GoPlus, DexScreener and public RPC nodes, checking for honeypots, owner powers, taxes, liquidity, proxies and fund links to mixers or exploiters.
+> "People ask AI assistants 'is this token safe?', and without data the assistant guesses. I built web3-risk-mcp, an MCP server that gives any MCP-compatible assistant real tools to check a wallet, token or smart contract across six EVM chains, including Circle's Arc. It pulls from Etherscan, GoPlus, DexScreener and public RPC nodes, checking for honeypots, owner powers, taxes, liquidity, proxies and fund links to mixers or exploiters.
 >
-> The key design choice: analysis only produces findings, and a separate pure scorer turns them into a 0–100 score using a public rule table, with a reason for every point. Duplicate findings from different sources count once, decisive findings like a honeypot set a floor of 75, and missing data lowers confidence instead of the score. It's read-only by design: the RPC client refuses any non-read method. There are 102 tests, and a 34-address evaluation that runs with and without my local bad-address list. The live evaluation numbers aren't in yet."
+> The key design choice: analysis only produces findings, and a separate pure scorer turns them into a 0–100 score using a public rule table, with a reason for every point. Duplicate findings from different sources count once, decisive findings like a honeypot set a floor of 75, and missing data lowers confidence instead of the score. It's read-only by design: the RPC client refuses any non-read method. There are 170 tests, and a 34-address evaluation that runs with and without my local bad-address list: ROC AUC 0.981 with it, 0.958 without. On Arc, it's also a live web page that checks an address before you send USDC."
 
 ---
 
@@ -21,10 +21,10 @@ MCP is the standard way AI assistants call tools. Write it once and it works in 
 Two reasons. There isn't a big labelled dataset, and the whole point is explainability: every point has a reason a beginner can read. The honest cost is that the weights are hand-set. With a larger labelled set, I'd fit weights (e.g. logistic regression over finding IDs), which keeps each contribution explainable.
 
 ### 3. "How does the score work exactly?"
-Each finding ID maps to points in an 85-rule table. Findings about the same problem share a group, and only the max counts. Sum, then clamp to 0–100. If any of 11 decisive findings exist, the score is at least 75. Confidence is high if every source answered, medium if up to half failed, low otherwise. Levels: 75+ critical, 50+ high, 20+ medium.
+Each finding ID maps to points in a 92-rule table. Owner powers together are capped at 30 points. Findings about the same problem share a group, and only the max counts. Sum, then clamp to 0–100. If any of 12 decisive findings exist, the score is at least 75. Confidence is high if every source answered, medium if up to half failed, low otherwise. Levels: 75+ critical, 50+ high, 20+ medium.
 
 ### 4. "How do you know it works?"
-The code is tested: 102 tests with all HTTP mocked. How well the score separates risky from safe addresses is **not measured yet**. The harness is ready, with 34 labelled addresses, ROC AUC, and precision and recall at 50. It runs twice, once without the local bad list, so the list can't carry the result. I haven't done the live run.
+The code is tested: 170 tests with all HTTP mocked. On 34 labelled addresses, the first live run gave ROC AUC 0.981: 11 of 12 risky caught and 1 false alarm in 22 safe, at a cut-off of 50. It runs twice, once without the local bad list, so the list can't carry the result. Without it: AUC 0.958 and 3 misses.
 
 ### 5. "Why the second eval run without the local list?"
 Six of the 12 risky items are on my local list. With the list on, the score would catch them trivially. The second run shows what GoPlus, contract analysis and behaviour catch on their own. That's the more honest number.
@@ -62,7 +62,8 @@ The method document is generated from the rule table, and a test fails if the co
 
 | Weak spot | Poke | Answer |
 |---|---|---|
-| No live eval results | "What's your AUC?" | "Not measured yet. The harness and dataset are ready, with a replay cassette for reproducibility." |
+| Small eval | "What's your AUC?" | "0.981 on 34 addresses, 0.958 without my list. That's a small set, so it's rough, and it has no Arc addresses yet." |
+| The USDT false alarm | "USDT scored 68?" | "Its owner really can change balances. That's a real power, just not a scam. After the first run I capped owner powers at 30 points together." |
 | Hand-set weights | "Why 60 for honeypot?" | "It's a deal-breaker pattern, and it's also decisive (floor 75). The weights are public and will be checked by the eval." |
 | Tiny eval set | "34 items proves nothing." | "Agreed, it's a sanity check. Growing it is the next step before fitting any weights." |
 | Relies on GoPlus | "Isn't GoPlus doing the work?" | "For token flags, largely yes. My value is combining sources, contract and trace analysis, and explainable scoring. The no-list eval pass measures the rest." |

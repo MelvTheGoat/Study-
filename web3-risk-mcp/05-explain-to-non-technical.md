@@ -35,7 +35,8 @@ The tool only **reads** public information. It never asks for passwords or secre
 ## Honest limits
 
 - A low score means "no red flags found", not "guaranteed safe". A brand-new scam might not show up yet.
-- I've prepared a test with 34 known good and bad addresses, but I haven't run the live test yet, so I don't have accuracy numbers to share.
+- I tested it on 34 known good and bad addresses. It caught 11 of the 12 bad ones, and wrongly warned about 1 of the 22 good ones.
+- There's now also a web page for Arc, a blockchain made by Circle, the company behind the USDC dollar coin. It checks an address before you send money, and won't let you send to an address Circle has blocked.
 
 ## What this shows about me
 

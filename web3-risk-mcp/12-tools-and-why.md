@@ -34,7 +34,7 @@ All the data services are used on their free plans. Everything the tool does is 
 ### Etherscan (V2 API)
 **What it is:** a popular service for looking up blockchain data: transaction history and published contract code.
 
-**Why it's used here:** it provides wallet history and a contract's published source code. One free key covers all 5 supported blockchains. The free plan doesn't include account history on Base or BNB Chain.
+**Why it's used here:** it provides wallet history and a contract's published source code. One free key covers all 6 supported blockchains, including Arc. The free plan doesn't include account history on Base or BNB Chain.
 
 ### GoPlus
 **What it is:** a security service that scans tokens and addresses for known scam signs.
@@ -82,7 +82,7 @@ All the data services are used on their free plans. Everything the tool does is 
 ### pytest, pytest-asyncio and respx
 **What it is:** pytest runs tests. pytest-asyncio lets it test code that does many things at once. respx fakes web services during tests.
 
-**Why it's used here:** 102 tests pass in about 5 seconds. Every outside service is faked, so no keys or internet are needed.
+**Why it's used here:** 170 tests pass in about 10 seconds. Every outside service is faked, so no keys or internet are needed.
 
 ### ruff
 **What it is:** a fast "linter" and formatter: it flags mistakes and tidies the code's layout.

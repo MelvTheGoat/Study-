@@ -2,7 +2,7 @@
 
 Repo: https://github.com/MelvTheGoat/web3-risk-mcp
 
-1. **An MCP server that lets any AI assistant check a crypto wallet, token or contract for scam risk, across 5 EVM chains.**
+1. **An MCP server that lets any AI assistant check a crypto wallet, token or contract for scam risk, across 6 EVM chains, including Circle's Arc.**
    *Why it matters:* it's an AI-tool integration project, not just a scorer.
 
 2. **6 tools (`score_risk`, wallet, token, contract, trace, chains), 1 resource (scoring method) and 1 prompt (`investigate_address`).**
@@ -29,5 +29,5 @@ Repo: https://github.com/MelvTheGoat/web3-risk-mcp
 9. **Tracing is a sample: 100 txs at the root, 50 at hop 2, fan-out 3, never expanding exchanges, protocols or burn addresses.**
    *Why it matters:* it explains the limits of "clean" results.
 
-10. **102 tests pass. The eval set has 34 addresses (12 risky, 22 safe) and runs with and without the local list. Live results are not measured yet.**
+10. **170 tests pass. The eval set has 34 addresses (12 risky, 22 safe): ROC AUC 0.981, 1 false alarm, 1 miss (0.958 without the local list). Arc Safe Send is live.**
     *Why it matters:* be ready to say what's proven and what isn't.
