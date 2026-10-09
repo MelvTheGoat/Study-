@@ -121,6 +121,12 @@ flowchart TB
 - No fairness evaluation possible (no demographic attributes).
 - Results aren't committed, so numbers can't be checked without re-running.
 
+**In progress (Oct 2026, unmerged branch, `deploy/`):** a public demo over the unmodified scoring API. `deploy/app.py` adds `/` and `/demo/*` routes to the existing app, so the page calls the production `/score`. A visitor picks a real test-period customer history (the request needs 62 prior transactions) and edits only the candidate transaction.
+
+Hosting: a Docker image with the bundle baked in (2.01 GB image, 290 MiB resident, verified under a 512 MB limit), a Hugging Face Space script, and a Render blueprint on a `deploy-render` branch that carries the model files. Measured on Render: 0.5 CPU meets the 50 ms budget (blocked p50 14.0 ms); the free 0.1 CPU misses it (p99 1,519 ms, 124 s cold start).
+
+A static route runs the same ONNX graph in the browser with ONNX Runtime Web over 150 precomputed scenarios, matching the server to within 3e-07. Not merged, no public URL yet.
+
 ## What I'd change at 10x scale
 
 - **A feature store** sharing the same feature code, for long-horizon history instead of a 31-transaction cap.

@@ -17,6 +17,7 @@ An honest comparison of sequence models (GRU, TCN, Transformer) against a strong
 | Cost | 0.0799 ± 0.0122 vs 0.0860 ± 0.0035 (not significant) |
 | Tests (my run) | 144 passing |
 | Note | One commit. Results files not committed. Numbers are from the README. |
+| In progress (Oct 2026) | A public demo of the scoring service, on an unmerged branch: a web page over the real `/score` endpoint, a Docker image, Hugging Face Space and Render scripts, and a browser-only version. Not on `main`, and no public link yet. |
 
 ## Files
 

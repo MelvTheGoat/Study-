@@ -278,6 +278,10 @@ These come from the project's report, averaged over 3 runs:
 - **31 payments** of history loses longer-term patterns.
 - **The results files aren't saved** in the project.
 
+And one thing being built right now, on a separate branch: a demo anyone can click. A small web page talks to the very same scoring endpoint a payment system would use, so it proves the real thing works, not a copy. You pick a real customer's history from the made-up data, change the new payment, and watch the score move.
+
+It can run in a container, on Hugging Face or Render, or entirely inside your browser. And the numbers are measured, not guessed. On Render's free plan it works, but misses the 50 millisecond limit and takes about two minutes to wake up, and the notes say so plainly. It isn't merged yet, and there's no public link.
+
 ## Let's put it all together
 
 So let's look at it in one breath.

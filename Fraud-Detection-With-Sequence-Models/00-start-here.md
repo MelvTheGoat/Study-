@@ -99,6 +99,10 @@ These come from the project's report, averaged over 3 training runs.
 - The costs (£8 and £15) are assumptions.
 - The result files aren't saved in the project.
 
+**What's being worked on now (October 2026).** A demo that lets anyone try the scoring service is being built on a separate branch. A simple web page talks to the same `/score` endpoint a payment system would call. You pick a real customer history from the made-up data, then change the new payment and see the score.
+
+It can run in a container, on Hugging Face Spaces or on Render, or even entirely in your browser. The measured numbers are honest: on Render's free plan it works but misses the 50 ms time limit, and takes about two minutes to wake up. It isn't merged yet, and there's no public link.
+
 ## 9. What This Project Shows You Can Do
 
 - Run a fair, honest contest between models.
